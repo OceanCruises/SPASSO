@@ -1,0 +1,347 @@
+#!/usr/bin/python3
+
+from termcolor import cprint
+import os
+from os.path import basename
+import glob
+import sys
+import datetime
+import time
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
+from email.mime.base import MIMEBase
+from email import encoders
+import requests
+
+import GlobalVars
+
+def Done(*args):
+    if not args:
+        cprint("\t Done", 'green', attrs=['bold'])
+        Logfile("\n \t Done \n")
+    else:
+        for arg in args:
+            cprint("\t"+arg, 'green', attrs=['bold'])
+            Logfile("\n \t "+arg+" \n")
+
+def Logfile(txt):
+    if os.path.isfile(GlobalVars.Dir['dir_wrk']+'spassoLog.txt'):
+        f = open(GlobalVars.Dir['dir_wrk']+'spassoLog.txt','a')
+        if isinstance(txt, str):
+            f.write(txt+'\n')
+        elif isinstance(txt, dict):
+            for key, value in txt.items(): 
+                     f.write('\t\t%s : %s\n' % (key, value))        
+        f.close()
+    else:
+        f = open(GlobalVars.Dir['dir_wrk']+'spassoLog.txt','w')
+        f.write(txt+'\n')
+        f.close()
+    
+def printMessage(message):
+    txt = '\t## ' + message
+    cprint(txt,'cyan',attrs=['bold'])
+    Logfile(txt)
+    
+def printInfo(message):
+    txt = '\t '+ message
+    cprint(txt, 'yellow', attrs=['bold'])
+
+def Listproducts():
+    dic = dict(GlobalVars.config.items('products'))
+    Logfile('List of products:')
+    Logfile(dic)
+
+    
+def choose_cruise():
+    cruises = os.listdir("../Cruises")
+    found_campaigns = "\tThe following campaigns (repositories) were found by SPASSO:\n" \
+        + '\t\t' + str(cruises) + '\n'
+    Logfile(found_campaigns)
+    user_selection_config = GlobalVars.config.get('cruises', 'cruise')
+    current_campaign = "\tSpasso is actually working on the " + user_selection_config + " cruise.\n"
+    cprint(current_campaign, 'yellow', attrs=['bold'])
+    Logfile(current_campaign)
+    return user_selection_config
+
+## current date
+def get_current_date():
+	today = datetime.datetime.now()
+	return today.strftime("%Y/%m/%d %H:%M")
+
+def printMainMessage(message):
+    txt = '\n##################################################\n'\
+        + '##\t' + message + '\n' \
+            + '##################################################\n'
+    #cprint('\n\t##################################################', 'blue', attrs=['bold'])
+    #cprint('\t## ' + message, 'blue', attrs=['bold'])
+    #cprint('\t##################################################\n', 'blue', attrs=['bold'])
+    cprint(txt,'blue', attrs=['bold'])
+    Logfile(txt)
+
+def welcome_message():
+    welcome_message = "\n##########################################################\n\
+##\t\t\t\t\t\t\t\n\
+##\t\t\t\t\t\t\t\n\
+##\t SPASSO software V2.0\t\n\
+##\tContact: " + str(GlobalVars.config.get('email', 'sender_mail')) + "\t\t\n\
+##\t\t\t\t\t\t\t\n\
+##########################################################\n"
+    
+    cprint(welcome_message, 'blue', attrs=['bold'])
+    Logfile(welcome_message)
+
+def exit_program(error_value):
+
+    if error_value == 1:
+        cprint("\nProgram exit with errors.\n", 'red', attrs=['bold'])
+        sys.exit(1)
+    elif error_value == 2:
+        cprint("\tCorrect data.", 'yellow', attrs=['bold'])
+        sys.exit(2)
+    else:
+        txt = "\n##########################################################\n\
+##\t\t\t\t\t\t\t\n\
+##\t Successfully end program on: \n\
+##\t "+get_current_date()+"\n\
+##\t Thanks for using SPASSO.\n\
+##\t\t\t\t\t\t\t\n\
+##########################################################\n"
+        cprint(txt, 'blue', attrs=['bold'])
+        Logfile(txt)
+        #move log file into Logs/
+        logf = "spassoLog"+GlobalVars.all_dates['today']+".txt"
+        req = "mv "+GlobalVars.Dir['dir_wrk']+"spassoLog.txt "\
+            + GlobalVars.Dir['dir_logs']+logf
+        os.system(req)
+        sys.exit(0)
+
+def ExistingFile(fname,date):
+    ff = glob.glob(fname)
+    exf = os.path.exists(str(ff).strip("['']"))
+    if exf == True:
+        Done(date+' file downloaded')
+        ff = ff[0]
+    elif exf == False:
+        if len(ff)>1:
+            Done('Several files available: '+date+' '+GlobalVars.all_dates['d0']+' used.')
+            files_ascending = sorted(ff, key=lambda t: os.stat(t).st_mtime)
+            if GlobalVars.all_dates['d0']=='d0':
+                ff = files_ascending[0]
+            elif GlobalVars.all_dates['d0']=='d1':
+                ff = files_ascending[1]
+        else:
+            cprint('\tCould not find '+date+' file to load !','red',attrs=['bold'])
+	
+    return exf,ff
+
+
+def clean_wrk():
+    #os.system("rm -rf "+GlobalVars.Dir['dir_wrk']+"/oftheday")
+    #os.system("mkdir "+GlobalVars.Dir['dir_wrk']+"/oftheday")
+    os.system("rm "+GlobalVars.Dir['dir_wrk']+"*.*")
+
+def execute_req(req):
+    Logfile("\tTrying to execute:\n")
+    Logfile("\t" + str(req) + "\n")   
+    try:
+        os.system(req)
+    except:
+        Logfile("\tERROR in:\n" + req + "\nExiting program.")
+        cprint("\tERROR in:\n" + req + "\nExiting program.", 'red',attrs=['bold'])
+        exit()
+        
+def GetVars(data):
+    if 'cls' in data:
+        user   = GlobalVars.config.get('userpwd', 'userCLS')
+        pwd    = GlobalVars.config.get('userpwd', 'pwdCLS')
+        name   = GlobalVars.config.get('products', 'name_'+data)
+        arc    = GlobalVars.config.get('products', data+'_arc')
+    elif 'h8' in data:
+        user   = GlobalVars.config.get('userpwd', 'userH8')
+        pwd    = GlobalVars.config.get('userpwd', 'pwdH8')
+        name   = []
+        arc    = []
+    elif 'sen3' in data:
+        user   = GlobalVars.config.get('userpwd', 'userSEN3')
+        pwd    = GlobalVars.config.get('userpwd', 'pwdSEN3')
+        name   = []
+        arc    = []
+    else:
+        user   = GlobalVars.config.get('userpwd', 'userCMEMS')
+        pwd    = GlobalVars.config.get('userpwd', 'pwdCMEMS')
+        name   = []
+        arc    = [] 
+        
+
+    direct     = GlobalVars.repositories['dir_'+data]
+    path       = GlobalVars.config.get('products', 'path_'+data)    
+    prod       = GlobalVars.config.get('products', data+'prod')
+    year       = GlobalVars.all_dates['year_'+data]
+    month      = GlobalVars.all_dates['month_'+data]
+    day        = GlobalVars.all_dates['day_'+data]
+    date       = GlobalVars.all_dates['date_'+data]
+    datef      = GlobalVars.all_dates['datef_'+data]
+    dir_wrk    = GlobalVars.Dir['dir_wrk']
+    logf       = GlobalVars.Dir['dir_wrk'] + 'spassoLog.txt'
+    mode       = GlobalVars.config.get('cruises', 'mode')
+    Lon        = [float(x) for x in GlobalVars.config.get('cruise_param','Lon').split(',')]
+    Lat        = [float(x) for x in GlobalVars.config.get('cruise_param','Lat').split(',')]
+    
+    var = {"direct":direct,
+           "path":path,
+           "user":user,
+           "pwd":pwd,
+           "prod":prod,
+           "year":year,
+           "month":month,
+           "day":day,
+           "date":date,
+           "datef":datef,
+           "dir_wrk":dir_wrk,
+           "logf":logf,
+           "mode":mode,
+           "name":name,
+           "Lon":Lon,
+           "Lat":Lat,
+           "arc":arc
+        }
+    return var
+
+def send_email(cruise):
+    msg = MIMEMultipart()
+    msg["Subject"] = " "+cruise+" Spasso files"
+    msg["From"] = GlobalVars.Email['sender']
+    msg["To"] = ",".join(GlobalVars.Email['receiver'])
+    # write the text/plain part
+    text = """\
+    Dear Spasso user,
+    
+    Please find attached the daily Figures computed by SPASSO for the """+cruise+""" cruise.
+    
+    *** This email was automatically generated by Python3 from @satellite machine ***
+    
+    """
+
+    # convert to MIMEText objects and add them to the MIMEMultipart message
+    msg.attach(MIMEText(text, "plain"))
+    
+    #attach figures and tex
+    files = []
+    if 'tar' in GlobalVars.Email['attach']:
+        files += glob.glob(GlobalVars.Dir['dir_wrk']+'*.tar.gz')
+    if 'tex' in GlobalVars.Email['attach']:
+        files += glob.glob(GlobalVars.Dir['dir_wrk']+'*bulletin*tex')
+    for f in files:
+        with open(f, "rb") as fil:
+            part = MIMEApplication(fil.read(),Name=basename(f))
+        msg.attach(part)
+
+    #attach pdf
+    if 'pdf' in GlobalVars.Email['attach']:
+        pdfpath = glob.glob(GlobalVars.Dir['dir_wrk']+'*bulletin*.pdf')
+        pdfname = os.path.basename(pdfpath[0])
+        binpdf = open(pdfpath[0],'rb')
+        payload = MIMEBase('application', 'octate-stream', Name=pdfname)
+        payload.set_payload((binpdf).read())
+        encoders.encode_base64(payload)
+        msg.attach(payload)
+
+    # send your email
+    with smtplib.SMTP(GlobalVars.Email['smtp'],GlobalVars.Email['port']) as server:
+        server.connect(GlobalVars.Email['smtp'],GlobalVars.Email['port'])
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+        if GlobalVars.Email['login']!='':
+            server.login(GlobalVars.Email['login'],GlobalVars.Email['password'])
+        server.sendmail(GlobalVars.Email['sender'],GlobalVars.Email['receiver'],msg.as_string())
+    txt = 'Email was sent to:'+','.join(GlobalVars.Email['receiver'])
+    Done(txt)
+    return
+ 
+def copyfiles():
+    os.chdir(GlobalVars.Dir['dir_wrk'])
+    execute_req("cp *.png ../Figures")
+    Done('Copy in Figures/ done.')
+    execute_req("cp *.nc ../Processed")
+    Done('Copy in Processed/ done.')
+    execute_req("tar -czf "+GlobalVars.all_dates['ref']+"_Figures.tar.gz *.png")
+    Done('Figures are zipped in '+GlobalVars.all_dates['ref']+'_Figures.tar.gz .')
+    return
+
+#Homemade version of matlab tic and toc functions
+def tic():
+    global startTime_for_tictoc
+    startTime_for_tictoc = time.time()
+
+def toc(comment):
+    if 'startTime_for_tictoc' in globals():
+        txt = "Elapsed time to compute "+comment+" is " + str(time.time() - startTime_for_tictoc) + " seconds.\n\n"
+    else:
+        txt = "Toc: start time not set"
+    Logfile(txt)
+
+
+def get_SEN3json(datef):
+    """
+    Get products id and full name for sentinel3 data
+    product date depends on satellite passing time
+    so an adjustement window over the product time is required (dday1, dday2)
+    """
+    
+    def get_url(dday1,dday2):
+        url = "https://catalogue.dataspace.copernicus.eu/odata/v1/Products?$filter=contains(Name,'S3') "\
+        +"and contains(Name,'_OL_2_WFR____') and contains(Name,'_0179_') and contains(Name,'_2340_MAR_O_NR_003.SEN3')"\
+            +" and ContentDate/Start gt "+dday1+" and ContentDate/Start lt "+dday2
+    
+        r = requests.get(url)
+        data = r.json()
+        value = data['value']
+        return value
+    
+    datet = datetime.datetime.strptime(datef,'%Y%m%d').date()
+    refd = datetime.date(2023,3,22)
+    refh = datetime.datetime.strptime('0930','%H%M')
+    deltad = (datet-refd).days
+    hd1 = refh - (datetime.timedelta(minutes=1)*deltad) #one minute delay every day
+    hd2 = hd1 + datetime.timedelta(minutes=45)
+    shd1 = datetime.datetime.strftime(hd1,'%H:%M:%S')
+    shd2 = datetime.datetime.strftime(hd2,'%H:%M:%S')
+    dday1 = datetime.datetime.strftime(datet,'%Y-%m-%d')+'T'+shd1+'.000Z'
+    dday2 = datetime.datetime.strftime(datet,'%Y-%m-%d')+'T'+shd2+'.000Z'
+    
+    value = get_url(dday1,dday2)
+    
+    if value:
+        idp = value[0]['Id']
+        name = value[0]['Name']
+    else:
+        hd2 = hd2 + datetime.timedelta(minutes=45)
+        shd2 = datetime.datetime.strftime(hd2,'%H:%M:%S')
+        dday2 = datetime.datetime.strftime(datet,'%Y-%m-%d')+'T'+shd2+'.000Z'
+        value = get_url(dday1,dday2)
+        if value:
+            idp = value[0]['Id']
+            name = value[0]['Name']
+        else:
+            idp,name = None,None
+    
+    return idp,name
+
+def get_SEN3token(user,pwd):
+    URL = "https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token"
+
+    payload = {
+        'grant_type': 'password',
+        'client_id': 'cdse-public',
+        'username': user,
+        'password': pwd
+    }
+     
+    r = requests.post(URL,headers={"Content-Type":"application/x-www-form-urlencoded"},
+        data=payload)
+    token = r.json()['access_token']
+    return token
