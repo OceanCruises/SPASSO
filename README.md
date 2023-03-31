@@ -9,3 +9,9 @@ SPASSO website: https://spasso.mio.osupytheas.fr/
 The manuscript detailing the first release of SPASSO, version 2.0, is currently in preparation:
 
 *Rousselet, L., d'Ovidio, F., Nencioli, F., ...(in prep) A Software Package for an Adaptive Satellite-based Sampling for Oceanographic cruises (SPASSOv2.0): tracking fine-scale features for biophysical studies.*
+
+### SPASSO fundings and support
+SPASSO development has been supported by the following organisations:
+- LOCEAN (Laboratoire d'Océanographie et du Climat: Expérimentations et Approches Numériques), Sorbonne University
+- MIO (Mediterranean Institute of Oceanography), Aix-Marseille University
+- CNES (Centre National d'Études Spatiales)
