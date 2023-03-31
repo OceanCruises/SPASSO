@@ -1,6 +1,6 @@
 ## SPASSO
 
-**SPASSO** (**S**oftware **P**ackage for **A**daptive **S**atellite-based **S**ampling for **O**ceanographic cruises is a Python code designed to compute daily maps of ocean state, based on available satellite data, to help guiding oceanographic cruise sampling. It can be used during oceanographic campaigns (near-real-time mode) or pre- and post-cruise to prepare sampling strategy and analyze observations. SPASSO code includes an independant Lagrangian diagnostic package (LAMTA) available <a href="https://www.google.com/" target="_blank">here</a>.
+**SPASSO** (**S**oftware **P**ackage for **A**daptive **S**atellite-based **S**ampling for **O**ceanographic cruises is a Python code designed to compute daily maps of ocean state, based on available satellite data, to help guiding oceanographic cruise sampling. It can be used during oceanographic campaigns (near-real-time mode) or pre- and post-cruise to prepare sampling strategy and analyze observations. SPASSO code includes an independant Lagrangian diagnostic package (LAMTA) available <a href="https://github.com/rousseletL/lamtaLR" target="_blank">here</a>.
 
 SPASSO website: https://spasso.mio.osupytheas.fr/
 
