@@ -8,12 +8,16 @@ import sys
 import datetime
 import time
 import smtplib
+import numpy as np
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 from email.mime.base import MIMEBase
 from email import encoders
 import requests
+from simplekml import (Kml, OverlayXY, ScreenXY, Units, RotationXY,
+                       AltitudeMode, Camera)
+import matplotlib.pyplot as plt
 
 import GlobalVars
 
@@ -139,8 +143,6 @@ def ExistingFile(fname,date):
 
 
 def clean_wrk():
-    #os.system("rm -rf "+GlobalVars.Dir['dir_wrk']+"/oftheday")
-    #os.system("mkdir "+GlobalVars.Dir['dir_wrk']+"/oftheday")
     os.system("rm "+GlobalVars.Dir['dir_wrk']+"*.*")
 
 def execute_req(req):
@@ -266,6 +268,14 @@ def copyfiles():
     os.chdir(GlobalVars.Dir['dir_wrk'])
     execute_req("cp *.png ../Figures")
     Done('Copy in Figures/ done.')
+    if glob.glob(GlobalVars.Dir['dir_wrk']+'*.kmz'):
+        dirk = GlobalVars.Dir['dir_fig']+'kmz'
+        isexists = os.path.exists(dirk)
+        if not isexists:
+            os.makedirs(dirk)
+        execute_req("cp *.kmz "+dirk)
+        Done('Copy in Figures/kmz/ done.')
+
     execute_req("cp *.nc ../Processed")
     Done('Copy in Processed/ done.')
     execute_req("tar -czf "+GlobalVars.all_dates['ref']+"_Figures.tar.gz *.png")
@@ -345,3 +355,83 @@ def get_SEN3token(user,pwd):
         data=payload)
     token = r.json()['access_token']
     return token
+
+#### Functions to save kml outputs
+def make_kml(llcrnrlon, llcrnrlat, urcrnrlon, urcrnrlat,
+             figs, colorbar=None, **kw):
+    """TODO: LatLon bbox, list of figs, optional colorbar figure,
+    and several simplekml kw..."""
+
+    kml = Kml()
+    altitude = kw.pop('altitude', 2e7)
+    roll = kw.pop('roll', 0)
+    tilt = kw.pop('tilt', 0)
+    altitudemode = kw.pop('altitudemode', AltitudeMode.relativetoground)
+    camera = Camera(latitude=np.mean([urcrnrlat, llcrnrlat]),
+                    longitude=np.mean([urcrnrlon, llcrnrlon]),
+                    altitude=altitude, roll=roll, tilt=tilt,
+                    altitudemode=altitudemode)
+
+    kml.document.camera = camera
+    draworder = 0
+    for fig in figs:  # NOTE: Overlays are limited to the same bbox.
+        draworder += 1
+        ground = kml.newgroundoverlay(name='GroundOverlay')
+        ground.draworder = draworder
+        ground.visibility = kw.pop('visibility', 1)
+        ground.name = kw.pop('name', 'overlay')
+        ground.color = kw.pop('color', '9effffff')
+        ground.atomauthor = kw.pop('author', 'ocefpaf')
+        ground.latlonbox.rotation = kw.pop('rotation', 0)
+        ground.description = kw.pop('description', 'Matplotlib figure')
+        ground.gxaltitudemode = kw.pop('gxaltitudemode',
+                                       'clampToSeaFloor')
+        ground.icon.href = fig
+        ground.latlonbox.east = llcrnrlon
+        ground.latlonbox.south = llcrnrlat
+        ground.latlonbox.north = urcrnrlat
+        ground.latlonbox.west = urcrnrlon
+
+    if colorbar:  # Options for colorbar are hard-coded (to avoid a big mess).
+        screen = kml.newscreenoverlay(name='ScreenOverlay')
+        screen.icon.href = colorbar
+        screen.overlayxy = OverlayXY(x=0, y=0,
+                                     xunits=Units.fraction,
+                                     yunits=Units.fraction)
+        screen.screenxy = ScreenXY(x=0.015, y=0.075,
+                                   xunits=Units.fraction,
+                                   yunits=Units.fraction)
+        screen.rotationXY = RotationXY(x=0.5, y=0.5,
+                                       xunits=Units.fraction,
+                                       yunits=Units.fraction)
+        screen.size.x = 0
+        screen.size.y = 0
+        screen.size.xunits = Units.fraction
+        screen.size.yunits = Units.fraction
+        screen.visibility = 1
+
+    kmzfile = kw.pop('kmzfile', 'overlay.kmz')
+    kml.savekmz(kmzfile)
+
+def gearth_fig(llcrnrlon, llcrnrlat, urcrnrlon, urcrnrlat, pixels=1024):
+    """Return a Matplotlib `fig` and `ax` handles for a Google-Earth Image."""
+    aspect = np.cos(np.mean([llcrnrlat, urcrnrlat]) * np.pi/180.0)
+    xsize = np.ptp([urcrnrlon, llcrnrlon]) * aspect
+    ysize = np.ptp([urcrnrlat, llcrnrlat])
+    aspect = ysize / xsize
+
+    if aspect > 1.0:
+        figsize = (10.0 / aspect, 10.0)
+    else:
+        figsize = (10.0, 10.0 * aspect)
+
+    if False:
+        plt.ioff()  # Make `True` to prevent the KML components from poping-up.
+    figtmp = plt.figure(figsize=figsize,
+                     frameon=False,
+                     dpi=pixels//10)
+    # KML friendly image.  If using basemap try: `fix_aspect=False`.
+    axtmp = figtmp.add_axes([0, 0, 1, 1])
+    axtmp.set_xlim(llcrnrlon, urcrnrlon)
+    axtmp.set_ylim(llcrnrlat, urcrnrlat)
+    return figtmp, axtmp
