@@ -269,10 +269,14 @@ def copyfiles():
     execute_req("cp *.png ../Figures")
     Done('Copy in Figures/ done.')
     if glob.glob(GlobalVars.Dir['dir_wrk']+'*.kmz'):
-        dirk = GlobalVars.Dir['dir_fig']+'kmz'
+        dirk = GlobalVars.Dir['dir_fig']+'kmz/'
         isexists = os.path.exists(dirk)
         if not isexists:
             os.makedirs(dirk)
+        listf = glob.glob(GlobalVars.Dir['dir_wrk']+'Figures_oftheday_*.kmz')
+        for ff in listf:
+            req = "cp "+ff+" "+GlobalVars.Dir['dir_wrk']+"/"+GlobalVars.all_dates['today']+"_"+os.path.basename(ff)
+            execute_req(req)
         execute_req("cp *.kmz "+dirk)
         Done('Copy in Figures/kmz/ done.')
 
@@ -281,6 +285,12 @@ def copyfiles():
     execute_req("tar -czf "+GlobalVars.all_dates['ref']+"_Figures.tar.gz *.png")
     Done('Figures are zipped in '+GlobalVars.all_dates['ref']+'_Figures.tar.gz .')
     return
+
+def cleantmp():
+        #delete tmp png files
+        figs = glob.glob(GlobalVars.Dir['dir_wrk']+'/*tmp*png')
+        for ff in figs:
+            os.remove(ff)
 
 #Homemade version of matlab tic and toc functions
 def tic():
@@ -294,68 +304,6 @@ def toc(comment):
         txt = "Toc: start time not set"
     Logfile(txt)
 
-
-def get_SEN3json(datef):
-    """
-    Get products id and full name for sentinel3 data
-    product date depends on satellite passing time
-    so an adjustement window over the product time is required (dday1, dday2)
-    """
-    
-    def get_url(dday1,dday2):
-        url = "https://catalogue.dataspace.copernicus.eu/odata/v1/Products?$filter=contains(Name,'S3') "\
-        +"and contains(Name,'_OL_2_WFR____') and contains(Name,'_0179_') and contains(Name,'_2340_MAR_O_NR_003.SEN3')"\
-            +" and ContentDate/Start gt "+dday1+" and ContentDate/Start lt "+dday2
-    
-        r = requests.get(url)
-        data = r.json()
-        value = data['value']
-        return value
-    
-    datet = datetime.datetime.strptime(datef,'%Y%m%d').date()
-    refd = datetime.date(2023,3,22)
-    refh = datetime.datetime.strptime('0930','%H%M')
-    deltad = (datet-refd).days
-    hd1 = refh - (datetime.timedelta(minutes=1)*deltad) #one minute delay every day
-    hd2 = hd1 + datetime.timedelta(minutes=45)
-    shd1 = datetime.datetime.strftime(hd1,'%H:%M:%S')
-    shd2 = datetime.datetime.strftime(hd2,'%H:%M:%S')
-    dday1 = datetime.datetime.strftime(datet,'%Y-%m-%d')+'T'+shd1+'.000Z'
-    dday2 = datetime.datetime.strftime(datet,'%Y-%m-%d')+'T'+shd2+'.000Z'
-    
-    value = get_url(dday1,dday2)
-    
-    if value:
-        idp = value[0]['Id']
-        name = value[0]['Name']
-    else:
-        hd2 = hd2 + datetime.timedelta(minutes=45)
-        shd2 = datetime.datetime.strftime(hd2,'%H:%M:%S')
-        dday2 = datetime.datetime.strftime(datet,'%Y-%m-%d')+'T'+shd2+'.000Z'
-        value = get_url(dday1,dday2)
-        if value:
-            idp = value[0]['Id']
-            name = value[0]['Name']
-        else:
-            idp,name = None,None
-    
-    return idp,name
-
-def get_SEN3token(user,pwd):
-    URL = "https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token"
-
-    payload = {
-        'grant_type': 'password',
-        'client_id': 'cdse-public',
-        'username': user,
-        'password': pwd
-    }
-     
-    r = requests.post(URL,headers={"Content-Type":"application/x-www-form-urlencoded"},
-        data=payload)
-    token = r.json()['access_token']
-    return token
-
 #### Functions to save kml outputs
 def make_kml(llcrnrlon, llcrnrlat, urcrnrlon, urcrnrlat,
              figs, colorbar=None, **kw):
@@ -363,7 +311,7 @@ def make_kml(llcrnrlon, llcrnrlat, urcrnrlon, urcrnrlat,
     and several simplekml kw..."""
 
     kml = Kml()
-    altitude = kw.pop('altitude', 2e7)
+    altitude = kw.pop('altitude', 2e6)
     roll = kw.pop('roll', 0)
     tilt = kw.pop('tilt', 0)
     altitudemode = kw.pop('altitudemode', AltitudeMode.relativetoground)
@@ -374,12 +322,14 @@ def make_kml(llcrnrlon, llcrnrlat, urcrnrlon, urcrnrlat,
 
     kml.document.camera = camera
     draworder = 0
+    names = kw['name']
+    ii = 0
     for fig in figs:  # NOTE: Overlays are limited to the same bbox.
         draworder += 1
         ground = kml.newgroundoverlay(name='GroundOverlay')
         ground.draworder = draworder
         ground.visibility = kw.pop('visibility', 1)
-        ground.name = kw.pop('name', 'overlay')
+        ground.name = names[ii]
         ground.color = kw.pop('color', '9effffff')
         ground.atomauthor = kw.pop('author', 'ocefpaf')
         ground.latlonbox.rotation = kw.pop('rotation', 0)
@@ -391,6 +341,7 @@ def make_kml(llcrnrlon, llcrnrlat, urcrnrlon, urcrnrlat,
         ground.latlonbox.south = llcrnrlat
         ground.latlonbox.north = urcrnrlat
         ground.latlonbox.west = urcrnrlon
+        ii = ii+1
 
     if colorbar:  # Options for colorbar are hard-coded (to avoid a big mess).
         screen = kml.newscreenoverlay(name='ScreenOverlay')

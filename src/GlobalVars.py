@@ -34,14 +34,29 @@ def init_prodDate():
         day4_ago = datetime.datetime.today() - datetime.timedelta(days=4)
         day5_ago = datetime.datetime.today() - datetime.timedelta(days=5)
         day6_ago = datetime.datetime.today() - datetime.timedelta(days=6)
+        day1_after = datetime.datetime.today() + datetime.timedelta(days=1)
         
         for pr in prod:
             ago = config.get('products',pr+'_date')
-            all_dates['date_' + pr.lower()]  = [eval('day'+ago+'.strftime("%Y%m%d")')]
-            all_dates['year_' + pr.lower()]  = [eval('day'+ago+'.strftime("%Y")')]
-            all_dates['month_' + pr.lower()] = [eval('day'+ago+'.strftime("%m")')]
-            all_dates['day_' + pr.lower()] = [eval('day'+ago+'.strftime("%d")')]
-            all_dates['datef_' + pr.lower()]  = [eval('day'+ago+'.strftime("%Y-%m-%d")')]
+            if config.has_option('products',pr+'_refdate'):
+                refd = str(config.get('products',pr+'_refdate'))
+                refd = datetime.datetime.strptime(refd,'%Y-%m-%d %H:%M')
+                if config.has_option('products',pr+'_ddelta'):
+                    delta = str(config.get('products',pr+'_ddelta'))
+                    ndays = (day0_ago - refd).days
+                    delta = eval('datetime.timedelta('+delta+')')
+                    refd = refd - ndays*delta
+                all_dates['date_' + pr.lower()]  = refd.strftime("%Y%m%d%H%M")
+                all_dates['year_' + pr.lower()]  = refd.strftime("%Y")
+                all_dates['month_' + pr.lower()] = refd.strftime("%m")
+                all_dates['day_' + pr.lower()] = refd.strftime("%d")
+                all_dates['datef_' + pr.lower()]  = refd.strftime("%Y-%m-%d")
+            else:
+                all_dates['date_' + pr.lower()]  = [eval('day'+ago+'.strftime("%Y%m%d")')]
+                all_dates['year_' + pr.lower()]  = [eval('day'+ago+'.strftime("%Y")')]
+                all_dates['month_' + pr.lower()] = [eval('day'+ago+'.strftime("%m")')]
+                all_dates['day_' + pr.lower()] = [eval('day'+ago+'.strftime("%d")')]
+                all_dates['datef_' + pr.lower()]  = [eval('day'+ago+'.strftime("%Y-%m-%d")')]
         all_dates['today'] = current_dt.strftime('%Y%m%d')
         all_dates['ref'] = current_dt.strftime('%Y%m%d')
         all_dates['d0'] = str(config.get('cruises','d0'))

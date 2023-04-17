@@ -52,6 +52,7 @@ def spasso():
     
     ############################### COPYING FIGURE AND SAVED
     Library.printMainMessage("COPYING AND ZIPPING DATA")
+    Library.cleantmp()
     Library.copyfiles()
     
     ############################### CREATE BULLETIN
