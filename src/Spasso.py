@@ -24,15 +24,15 @@ def spasso():
     products = [str(x) for x in GlobalVars.config.get('products','products').split(',')]
     opt = [str(x) for x in GlobalVars.config.get('plot_options','options').split(',')]
     mode = GlobalVars.config.get('cruises','mode')
-
+    outmode = GlobalVars.config.get('cruises','outmode')
+    
     for pr in products:
         nprod = GlobalVars.config.get('products',pr+'prod')
         #download data
         Library.printMessage("Downloading "+nprod)
         eval('Fields.'+nprod+'.download()')
         if mode == 'DT':
-            outmode = GlobalVars.config.get('cruises','outmode')
-            date = GlobalVars.all_dates['date_'+pr.lower()]
+            date = GlobalVars.all_dates['datec_'+pr.lower()]
             if outmode == 'clim':
                 Functions.climatology(nprod,date)
                 
@@ -43,12 +43,21 @@ def spasso():
     
 ################################ DIAGNOSTICS
     Library.printMainMessage("Computing diagnostics")
+
     ### Eulerian
     Library.tic()
-    Diagnostics.Launch(cruise,'eulerian')
+    if GlobalVars.Eul['diag'] is not None:
+        if outmode == 'clim':
+            Diagnostics.Launch(cruise,'eulerian',clim='on')
+        else:
+            Diagnostics.Launch(cruise,'eulerian')
     Library.toc('Eulerian diagnostics')
     ### Lagrangian
-    Diagnostics.Launch(cruise,'lagrangian')    
+    if GlobalVars.Lag['diag'] is not None:
+        if outmode == 'clim':
+            Diagnostics.Launch(cruise,'lagrangian',clim='on')   
+        else:
+            Diagnostics.Launch(cruise,'lagrangian')
     
     ############################### COPYING FIGURE AND SAVED
     Library.printMainMessage("COPYING AND ZIPPING DATA")
@@ -80,9 +89,10 @@ if __name__ == '__main__':
 
 ################# Initilisation et récupération of 'config.ini' file
 
-    cruise = args[1] # recupere le config inßi de la cruise
+    cruise = args[1] # recupere le config ini de la cruise
     GlobalVars.configIni(cruise)
     Library.clean_wrk()
+    GlobalVars.FigParam()
     GlobalVars.DiagParam()
     GlobalVars.EmailParam()
     GlobalVars.BulletinParam()

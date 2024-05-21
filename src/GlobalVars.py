@@ -34,6 +34,7 @@ def init_prodDate():
         day4_ago = datetime.datetime.today() - datetime.timedelta(days=4)
         day5_ago = datetime.datetime.today() - datetime.timedelta(days=5)
         day6_ago = datetime.datetime.today() - datetime.timedelta(days=6)
+        day7_ago = datetime.datetime.today() - datetime.timedelta(days=7)
         day1_after = datetime.datetime.today() + datetime.timedelta(days=1)
         
         for pr in prod:
@@ -51,12 +52,14 @@ def init_prodDate():
                 all_dates['month_' + pr.lower()] = refd.strftime("%m")
                 all_dates['day_' + pr.lower()] = refd.strftime("%d")
                 all_dates['datef_' + pr.lower()]  = refd.strftime("%Y-%m-%d")
+                all_dates['datec_' + pr.lower()]  = refd.strftime("%Y%m%d")
             else:
                 all_dates['date_' + pr.lower()]  = [eval('day'+ago+'.strftime("%Y%m%d")')]
                 all_dates['year_' + pr.lower()]  = [eval('day'+ago+'.strftime("%Y")')]
                 all_dates['month_' + pr.lower()] = [eval('day'+ago+'.strftime("%m")')]
                 all_dates['day_' + pr.lower()] = [eval('day'+ago+'.strftime("%d")')]
                 all_dates['datef_' + pr.lower()]  = [eval('day'+ago+'.strftime("%Y-%m-%d")')]
+                all_dates['datec_' + pr.lower()]  = [eval('day'+ago+'.strftime("%Y%m%d")')]
         all_dates['today'] = current_dt.strftime('%Y%m%d')
         all_dates['ref'] = current_dt.strftime('%Y%m%d')
         all_dates['d0'] = str(config.get('cruises','d0'))
@@ -78,8 +81,10 @@ def init_prodDate():
             all_dates['month_' + pr.lower()] = [x.strftime('%m') for x in refdate]
             all_dates['day_' + pr.lower()] = [x.strftime('%d') for x in refdate]
             all_dates['datef_' + pr.lower()] = [x.strftime('%Y-%m-%d') for x in refdate]
+            all_dates['datec_' + pr.lower()] = [x.strftime('%Y%m%d') for x in refdate]
         all_dates['today'] = current_dt.strftime('%Y%m%d')
         all_dates['ref'] = refdate[0].strftime('%Y%m%d')
+        all_dates['ref_all'] = [x.strftime('%Y%m%d') for x in refdate]
         all_dates['d0'] = str(config.get('cruises','d0'))
 
     Library.Logfile(all_dates)
@@ -95,8 +100,8 @@ def init_dataDir(cruise):
     repositories = {}
     
     for key in config['products']:
-        if 'path' in key:
-            dirn = 'dir_' + key[5:]
+        if 'id' in key:
+            dirn = 'dir_' + key[:-3]
             if 'phy' in key:
                 path = Dir['dir_data']+ 'ALTI/' + config['products'][key]
             elif 'sst' in key:
@@ -109,7 +114,8 @@ def init_dataDir(cruise):
                 path = Dir['dir_data']+ 'MEDSEA/' + config['products'][key]
             
             if 'cls' in key:
-                name = config['products']['name_'+key[5:]]
+                #name = config['products']['name_'+key[5:]]
+                name = config['products'][key[:-3]+'_name']
                 path += '/' + name
             repositories[dirn] = path
 
@@ -127,9 +133,14 @@ def init_dataDir(cruise):
 #######
 def directories(cruise):
     global Dir
+    global Param
 
     main_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/'
     cruise_path = main_path + "Cruises/" + cruise + "/" 
+    
+    Param = {
+        'cruise' : cruise       
+        }
     
     Dir = {
         'main_path' : main_path,
@@ -185,6 +196,19 @@ def DiagParam():
         'lati' : [float(x) for x in item[4][1].split(',')],
 		'delta0' : float(item[5][1]),
 		'UVunit' : item[6][1]
+	}
+    
+def FigParam():
+    global Fig
+    '''
+    User can set here various parameters for plotting
+    Items should be defined in the config.ini file
+    '''
+    key = config['plot_param']
+    dpi = int(key['figdpi']) if 'figdpi' in key else int(150)
+    
+    Fig = {
+        'dpi' : dpi,
 	}
     
 def EmailParam():

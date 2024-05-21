@@ -9,6 +9,7 @@ import datetime
 import time
 import smtplib
 import numpy as np
+from netCDF4 import Dataset
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
@@ -19,7 +20,7 @@ from simplekml import (Kml, OverlayXY, ScreenXY, Units, RotationXY,
                        AltitudeMode, Camera)
 import matplotlib.pyplot as plt
 
-import GlobalVars
+import GlobalVars,Fields
 
 def Done(*args):
     if not args:
@@ -123,11 +124,12 @@ def exit_program(error_value):
         sys.exit(0)
 
 def ExistingFile(fname,date):
-    ff = glob.glob(fname)
-    exf = os.path.exists(str(ff).strip("['']"))
+    fn = str(fname)
+    ff = glob.glob(fn)
+    exf = False if not ff else os.path.exists(ff[0])
     if exf == True:
         Done(date+' file downloaded')
-        ff = ff[0]
+        ff = fn
     elif exf == False:
         if len(ff)>1:
             Done('Several files available: '+date+' '+GlobalVars.all_dates['d0']+' used.')
@@ -154,38 +156,40 @@ def execute_req(req):
         Logfile("\tERROR in:\n" + req + "\nExiting program.")
         cprint("\tERROR in:\n" + req + "\nExiting program.", 'red',attrs=['bold'])
         exit()
+
+def UpdateVars(var,**kwargs):
+    for key, value in kwargs.items():
+        up = {key: value}
+        var.update(up)
         
 def GetVars(data):
     if 'cls' in data:
         user   = GlobalVars.config.get('userpwd', 'userCLS')
         pwd    = GlobalVars.config.get('userpwd', 'pwdCLS')
-        name   = GlobalVars.config.get('products', 'name_'+data)
+        name   = GlobalVars.config.get('products', data+'_name')
         arc    = GlobalVars.config.get('products', data+'_arc')
     elif 'h8' in data:
         user   = GlobalVars.config.get('userpwd', 'userH8')
         pwd    = GlobalVars.config.get('userpwd', 'pwdH8')
-        name   = []
-        arc    = []
     elif 'sen3' in data:
         user   = GlobalVars.config.get('userpwd', 'userSEN3')
         pwd    = GlobalVars.config.get('userpwd', 'pwdSEN3')
-        name   = []
-        arc    = []
+        id0    = [str(x) for x in GlobalVars.config.get('products', data+'_id0').split(',')]
+        id1    = [str(x) for x in GlobalVars.config.get('products', data+'_id1').split(',')]
     else:
         user   = GlobalVars.config.get('userpwd', 'userCMEMS')
         pwd    = GlobalVars.config.get('userpwd', 'pwdCMEMS')
-        name   = []
-        arc    = [] 
         
 
     direct     = GlobalVars.repositories['dir_'+data]
-    path       = GlobalVars.config.get('products', 'path_'+data)    
+    idd        = GlobalVars.config.get('products', data+'_id')    
     prod       = GlobalVars.config.get('products', data+'prod')
     year       = GlobalVars.all_dates['year_'+data]
     month      = GlobalVars.all_dates['month_'+data]
     day        = GlobalVars.all_dates['day_'+data]
     date       = GlobalVars.all_dates['date_'+data]
     datef      = GlobalVars.all_dates['datef_'+data]
+    datec      = GlobalVars.all_dates['datec_'+data]
     dir_wrk    = GlobalVars.Dir['dir_wrk']
     logf       = GlobalVars.Dir['dir_wrk'] + 'spassoLog.txt'
     mode       = GlobalVars.config.get('cruises', 'mode')
@@ -193,7 +197,7 @@ def GetVars(data):
     Lat        = [float(x) for x in GlobalVars.config.get('cruise_param','Lat').split(',')]
     
     var = {"direct":direct,
-           "path":path,
+           "id":idd,
            "user":user,
            "pwd":pwd,
            "prod":prod,
@@ -202,14 +206,19 @@ def GetVars(data):
            "day":day,
            "date":date,
            "datef":datef,
+           "datec":datec,
            "dir_wrk":dir_wrk,
            "logf":logf,
            "mode":mode,
-           "name":name,
            "Lon":Lon,
            "Lat":Lat,
-           "arc":arc
         }
+
+    if 'name' in locals(): var['name'] = name
+    if 'arc' in locals(): var['arc'] = arc
+    if 'id0' in locals(): var['id0'] = id0
+    if 'id1' in locals(): var['id1'] = id1
+    
     return var
 
 def send_email(cruise):
@@ -303,6 +312,116 @@ def toc(comment):
     else:
         txt = "Toc: start time not set"
     Logfile(txt)
+
+
+def get_SEN3json(datef,id0,id1):
+    """
+    Get products id and full name for sentinel3 data
+    product date depends on satellite passing time
+    so an adjustement window over the product time is required (dday1, dday2)
+    """
+    
+    def get_url(dday1,dday2,id0,id1,**kwargs):
+        url = "https://catalogue.dataspace.copernicus.eu/odata/v1/Products?$filter=contains(Name,'S3') "\
+        +"and contains(Name,'_OL_2_WFR____') and contains(Name,'179_"+id0+"_') and contains(Name,'_"+id1+"_MAR_O_NR_003.SEN3')"\
+            +" and ContentDate/Start gt "+dday1+" and ContentDate/Start lt "+dday2
+        
+        if 'Namenb' in kwargs:
+            url = "https://catalogue.dataspace.copernicus.eu/odata/v1/Products?$filter=contains(Name,'S3') "\
+            +"and contains(Name,'_OL_2_WFR____') and contains(Name,'"+kwargs['Namenb']+"_"+id0+"_') and contains(Name,'_"+id1+"_MAR_O_NR_003.SEN3')"\
+                +" and ContentDate/Start gt "+dday1+" and ContentDate/Start lt "+dday2
+    
+        r = requests.get(url)
+        data = r.json()
+        value = data['value']
+        return value
+    
+    datet = datetime.datetime.strptime(datef,'%Y%m%d').date()
+    refd = datetime.date(2023,3,22)
+    refh = datetime.datetime.strptime('0930','%H%M')
+    deltad = (datet-refd).days
+    hd1 = refh - (datetime.timedelta(minutes=1)*deltad) #one minute delay every day
+    hd2 = hd1 + datetime.timedelta(minutes=45)
+    shd1 = datetime.datetime.strftime(hd1,'%H:%M:%S')
+    shd2 = datetime.datetime.strftime(hd2,'%H:%M:%S')
+    dday1 = datetime.datetime.strftime(datet,'%Y-%m-%d')+'T'+shd1+'.000Z'
+    dday2 = datetime.datetime.strftime(datet,'%Y-%m-%d')+'T'+shd2+'.000Z'
+    
+    value = get_url(dday1,dday2,id0,id1)
+    
+    if value:
+        idp = value[0]['Id']
+        name = value[0]['Name']
+    else:
+        hd2 = hd2 + datetime.timedelta(minutes=45)
+        shd2 = datetime.datetime.strftime(hd2,'%H:%M:%S')
+        dday2 = datetime.datetime.strftime(datet,'%Y-%m-%d')+'T'+shd2+'.000Z'
+        value = get_url(dday1,dday2,id0,id1)
+        if value:
+            idp = value[0]['Id']
+            name = value[0]['Name']
+        else:
+            value = get_url(dday1,dday2,id0,id1,Namenb='180')
+            if value:
+                idp = value[0]['Id']
+                name = value[0]['Name']
+            else:
+                idp,name = None,None
+    
+    return idp,name
+
+def CreateSEN3(var):
+    for nf in range(len(var['date'])):
+        for id0 in var['id0']:
+            for id1 in var['id1']:
+                exf,ff=ExistingFile(var['direct']+"/"+var['date'][nf]+"_"+id0+"_geo_coordinates_"+id1+".nc",var['date'][nf])
+                if ff:
+                    file = Dataset(var['direct']+"/"+var['date'][nf]+"_"+id0+"_geo_coordinates_"+id1+".nc")
+                    lon = file.variables['longitude'][:,:]
+                    lat = file.variables['latitude'][:,:]
+                    file = Dataset(var['direct']+"/"+var['date'][nf]+"_"+id0+"_chl_oc4me_"+id1+".nc")
+                    chl = file.variables['CHL_OC4ME'][:]
+                    #collate variables
+                    if 'chln' not in locals():
+                        lonn = np.empty(np.shape(lon))
+                        latn = np.empty(np.shape(lat))
+                        chln = np.empty(np.shape(chl))
+                        
+                    #check dimensions
+                    if np.shape(chl)[0]!=np.shape(chln)[0]:
+                        dif = np.abs(np.shape(chl)[0]-np.shape(chln)[0])
+                        lonn = np.dstack((lonn,lon[:-dif,:]))
+                        latn = np.dstack((latn,lat[:-dif,:]))
+                        chln = np.dstack((chln,chl[:-dif,:]))
+                    else:
+                        lonn = np.dstack((lonn,lon))
+                        latn = np.dstack((latn,lat))
+                        chln = np.dstack((chln,chl))
+                else:
+                    cprint('\tCould not find '+var['date'][nf]+' file to load !','red',attrs=['bold'])
+    #createnc and save
+        if 'chln' in locals():
+            chln = chln[:,:,1:]
+            lonn = lonn[:,:,1:]
+            latn = latn[:,:,1:]
+            fname = var['dir_wrk']+'/'+var['date'][nf]+'_'+var['prod']+'.nc'
+            Fields.Sentinel3_CHL(fname).createnc3Dll(lonn,latn,chln,'Sentinel-3 '+var['date'][nf]+' CHL')
+    return 
+
+def get_SEN3token(user,pwd):
+    URL = "https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token"
+
+    payload = {
+        'grant_type': 'password',
+        'client_id': 'cdse-public',
+        'username': user,
+        'password': pwd
+    }
+     
+    r = requests.post(URL,headers={"Content-Type":"application/x-www-form-urlencoded"},
+        data=payload)
+    token = r.json()['access_token']
+    return token
 
 #### Functions to save kml outputs
 def make_kml(llcrnrlon, llcrnrlat, urcrnrlon, urcrnrlat,
