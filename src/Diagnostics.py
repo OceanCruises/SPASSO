@@ -847,7 +847,7 @@ class Eulerian():
         ss = dUdy + dVdx
         vor = -dUdy + dVdx
         ow = sn**2 + ss**2 - vor**2
-        ow = -ow*(60*60*24)**2 #daily
+        ow = ow*(60*60*24)**2 #daily
         
         ### saving ###
         if 'output' in kwargs and kwargs['output']=='netcdf':
