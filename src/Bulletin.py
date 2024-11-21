@@ -92,8 +92,16 @@ def fill_document(doc):
                         fig.add_image(f, width='300px')
                 doc.append(Command(command='clearpage'))
                         
-        with doc.create(Subsection('Other analysis')):
-            doc.append('Type here.')
+        with doc.create(Subsection('Wave forecast analysis')):
+            files = glob.glob(GlobalVars.Dir['dir_wrk']+'/*WAVF*.png')
+            if not files:
+                doc.append('No figures done.')
+            else:
+                doc.append('Type here.')
+                for f in files:
+                    with doc.create(Figure(position='h!')) as fig:
+                        fig.add_image(f, width='300px')
+                doc.append(Command(command='clearpage'))
     
     with doc.create(Center()):
         doc.append(bold('Acknowledgments'))
