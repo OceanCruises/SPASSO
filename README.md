@@ -28,27 +28,27 @@ git clone https://github.com/OceanCruises/SPASSO.git
 ```
 
 ## Directory tree
--`Cruises/`: contains the different cruise directories
-    -`CruiseName#1/` : contains the configuration file and all SPASSO outputs organized in the corresponding directories
--`Data/`: contains data downloaded from CMEMS .
-    -`BATHY/`: must contain a NETCDF  le including global bathymetry that can
+- `Cruises/`: contains the different cruise directories.
+    - `CruiseName#1/` : contains the configuration file and all SPASSO outputs organized in the corresponding directories.
+- `Data/`: contains data downloaded from CMEMS.
+    - `BATHY/`: must contain a NETCDF  le including global bathymetry that can
 be downloaded from NOAA.
--[`Doc/`](Doc/): contains user manual and useful documents such as references.
--`src/`: contains all source code:
-    -`Bulletin.py`: code preparing a tex and pdf bulletin file including all
+- [`Doc/`](Doc/): contains user manual and useful documents such as references.
+- `src/`: contains all source code:
+    - `Bulletin.py`: code preparing a tex and pdf bulletin file including all
 maps computed with SPASSO.
-    -`colormaps.py`: contains some useful colormaps.
-    -`Diagnostics.py`: code computing Eulerian and Lagrangian diagnostics.
-    -`Fields.py`: code to download, load and create netcdf for all the fields
+    - `colormaps.py`: contains some useful colormaps.
+    - `Diagnostics.py`: code computing Eulerian and Lagrangian diagnostics.
+    - `Fields.py`: code to download, load and create netcdf for all the fields
 used by SPASSO such as satellite, diagnostics and bathymetry.
-    -`Functions.py`: additional useful functions (ex: climatologies).
-    -`GlobalVars.py`: code loading all the global variables such as directory paths, dates, diagnostic parameters,
+    - `Functions.py`: additional useful functions (ex: climatologies).
+    - `GlobalVars.py`: code loading all the global variables such as directory paths, dates, diagnostic parameters,
 emailing parameters, and bulletin parameters.
-    -`Library.py`: code for SPASSO run functions to print messages,
+    - `Library.py`: code for SPASSO run functions to print messages,
 write in a log fille, send email, copy files, clean directories, execute shell requests..
 .
-    -`PlotField.py`: plot maps.
--`Spasso.py`: main code launching SPASSO software.
+    - `PlotField.py`: plot maps.
+- `Spasso.py`: main code launching SPASSO software.
 
 ## How to run SPASSO
 1. Open a terminal
