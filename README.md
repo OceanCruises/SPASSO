@@ -29,7 +29,7 @@ git clone https://github.com/OceanCruises/SPASSO.git
 
 ## Directory tree
 - [`Cruises/`](Cruises/): contains the different cruise directories.
-    - [* *`CruiseName#1/`* *](WMedSeaExample/): contains the configuration file and all SPASSO outputs organized in the corresponding directories.
+    - [ *`CruiseName#1/`* ](WMedSeaExample/): contains the configuration file and all SPASSO outputs organized in the corresponding directories.
 - [`Data/`](Data/): contains data downloaded from CMEMS.
     - `BATHY/`: must contain a NETCDF  le including global bathymetry that can
 be downloaded from NOAA.
