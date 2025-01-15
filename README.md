@@ -50,7 +50,7 @@ write in a log fille, send email, copy files, clean directories, execute shell r
     - `PlotField.py`: plot maps.
 - `Spasso.py`: main code launching SPASSO software.
 
-## How to run SPASSO
+## How to run SPASSO: test case
 1. Open a terminal
 2. Define the name of the Cruise:
 ```
@@ -65,11 +65,21 @@ cd spasso2.0/src/
 clear; python3 Spasso.py $cr
 ```
 
-> More detailed information on how to set up a new SPASSO configuration can be found in the [user manual](Doc/usermanual.pdf). Section 5 of the manual is a Tutorial on the western Mediterranean Sea.
-
+## How to create a new configuration
+1. Create a new Cruise directory:
+```
+cd spasso2.0/Cruises/
+mkdir <NameOfMyCruise>
+```
+2. Create a `config_<NameOfMyCruise>.ini` file:
+```
+cp /$localdir/spasso2.0/Cruises/WMedSeaExample/config_WMedSeaExample.ini /localdir/spasso2.0/Cruises/<NameOfMyCruise>/config_<NameOfMyCruise>.ini
+```
+3. Modify the `config_<NameOfMyCruise>.ini` file for the new configuration
 > [!TIP]
 > A full description of the configuration file parameters is available in the [config.ini](config.ini).
 
+> More detailed information on how to set up a new SPASSO configuration can be found in the [user manual](Doc/usermanual.pdf). Section 5 of the manual is a Tutorial on the western Mediterranean Sea.
 
 # How to cite
 
