@@ -67,7 +67,11 @@ clear; python3 Spasso.py $cr
 
 > More detailed information on how to set up a new SPASSO configuration can be found in the [user manual](Doc/usermanual.pdf). Section 5 of the manual is a Tutorial on the western Mediterranean Sea.
 
-# SPASSO manuscript and code
+> [!TIP]
+> A full description of the configuration file parameters is available in the [config.ini](config.ini).
+
+
+# How to cite
 
 The manuscript detailing the first release of SPASSO, version 2.0, is currently in revision for JTECH:
 
