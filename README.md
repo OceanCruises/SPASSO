@@ -16,7 +16,7 @@ SPASSO is a package designed for **Python >= 3.9**, tested on Linux and Mac syst
 Dependencies are listed in the [pyproject.toml](pyproject.toml) file.
 
 > [!TIP]
-> Run [check_modules.py](check_modules.py) in Python to get a list of required Python packages missing.
+> Run [check_modules.py](check_modules.py) in Python to get a list of required Python packages missing.\n
 > python packages can be installed using the `pip3 install <package_name>` or `python -m pip install <package_name>` commands. [How to install and use pip3](https://www.activestate.com/resources/quick-reads/how-to-install-and-use-pip3/#:~:text=Pip3%20is%20the%20official%20package,in%20the%20Python%20standard%20library.).
 
 ## Download  
