@@ -65,7 +65,7 @@ cd spasso2.0/src/
 clear; python3 Spasso.py $cr
 ```
 
-## How to create a new configuration
+## How to set up a new configuration
 1. Create a new Cruise directory:
 ```
 cd spasso2.0/Cruises/
