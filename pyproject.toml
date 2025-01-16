@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "SPASSO"
+description = "Package to map satellite-derived ocean state to guide oceanographic cruises."
+readme = "README.md"
+dynamic = ["version"]
+authors = [{name = "L. Rousselet, L. Izard"}]
+requires-python = ">=3.9"
+license = {file = "LICENSE"}
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+   "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: Linux, MacOS",
+  "Topic :: Scientific/Engineering",
+  "Intended Audience :: Science/Research",
+]
+dependencies = [
+"termcolor",
+"pandas",
+"netCDF4",
+"matplotlib",
+"cmocean",
+"scipy",
+"xarray",
+"basemap",
+"basemap-data-hires",
+"tabulate",
+"simplekml",
+"requests",
+"importlib-metadate",
+"pylatex",
+"copernicusmarine",
+"motuclient"
+]
+
+[project.urls]
+homepage = "https://spasso.mio.osupytheas.fr/"
+repository = "https://github.com/OceanCruises/SPASSO"

@@ -13,10 +13,10 @@ a daily bulletin (.tex file).
 ## Requirements
 SPASSO is a package designed for **Python >= 3.9**, tested on Linux and Mac systems. It also requires a LaTeX compiler (`latexmk` or `pdflatex`).
 
-Required python packages:\
-`termcolor`, `pandas`, `netCDF4`, `motuclient`, `matplotlib`, `cmocean`, `scipy`, `xarray`, `basemap` (`pyproj`, `pyshp`, `geos`), `basemap-data-hires`, `tabulate`, `simplekml`, `requests`, `importlib-metadate`, `pylatex`, `copernicusmarine`
+Dependencies are listed in the [pyproject.toml](pyproject.toml) file.
 
 > [!TIP]
+> Run [check_modules.py](check_modules.py) in Python to get a list of required Python packages missing.
 > python packages can be installed using the `pip3 install <package_name>` or `python -m pip install <package_name>` commands. [How to install and use pip3](https://www.activestate.com/resources/quick-reads/how-to-install-and-use-pip3/#:~:text=Pip3%20is%20the%20official%20package,in%20the%20Python%20standard%20library.).
 
 ## Download  
@@ -29,7 +29,7 @@ git clone https://github.com/OceanCruises/SPASSO.git
 
 ## Directory tree
 - [`Cruises/`](Cruises/): contains the different cruise directories.
-    - [ *`CruiseName#1/`* ](WMedSeaExample/): contains the configuration file and all SPASSO outputs organized in the corresponding directories.
+    - [ *`CruiseName#1/`*](WMedSeaExample/): contains the configuration file and all SPASSO outputs organized in the corresponding directories.
 - [`Data/`](Data/): contains data downloaded from CMEMS.
     - `BATHY/`: must contain a NETCDF  le including global bathymetry that can
 be downloaded from NOAA.
