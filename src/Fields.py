@@ -8,7 +8,7 @@ Created on Thu Jun  2 13:54:17 2022
 import GlobalVars, Library
 from netCDF4 import Dataset
 import cmocean as cm_oc
-import colormaps as cmaps
+import cblind as cb
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.colors import ListedColormap
@@ -17,7 +17,6 @@ import datetime
 import pandas as pd
 import glob
 import copernicusmarine
-import os
 
 class Load():
     def loadnc(self):
@@ -195,7 +194,7 @@ class Copernicus_PHY(Load,Create):
         self.v_name='vgos'
         self.u_units = 'm/s'
         self.v_units = 'm/s'
-        self.cmap = plt.get_cmap('PRGn')
+        self.cmap = cb.cbmap("cb.pregunta_r")
         if 'dayv' in kwargs: 
             self.date = datetime.datetime.strptime(kwargs['dayv'],"%Y-%m-%d")
         else: 
@@ -219,12 +218,12 @@ class Copernicus_PHY(Load,Create):
             # dowloading data in /DATA
             date_range = "*/" + year[nf] + "/" + mo[nf] + "/*_allsat_" + data + \
                 "_*_" + ddate[nf] + "_*.nc"
-            get_files = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
+            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
                                              password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,force_download='Y',
-                                             no_directories='Y',overwrite_output_data='Y')
-            
-            exf,ff = Library.ExistingFile(get_files[0],ddate[nf])
+                                             filter=date_range,no_directories='Y',overwrite='Y')
+            for file in query_metadata.files:
+                get_files = file.file_path
+            exf,ff = Library.ExistingFile(get_files,ddate[nf])
 
             if len(kwargs)==0 or 'cp' in kwargs:
                 # copying data in /Wrk
@@ -263,11 +262,13 @@ class Copernicus_PHYTOT(Load,Create):
             # dowloading data in /DATA
             date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + \
                 "/dataset-uv-nrt-daily_" + var['date'][nf] + "*_*.nc"
-            get_files = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
+            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
                                              password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,force_download='Y',overwrite_output_data='Y')
+                                             filter=date_range,overwrite='Y')
             
-            exf,ff = Library.ExistingFile(get_files[0],var['date'][nf])
+            for file in query_metadata.files:
+                get_files = file.file_path
+            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
             
             # copying data in /Wrk
             if ff:
@@ -315,11 +316,13 @@ class Copernicus_PHYEURO(Load,Create):
             # dowloading data in /DATA
             date_range = "*/" + year[nf] + "/" + mo[nf] + "/nrt_europe_allsat"+ \
             "_*_" + ddate[nf] + "_*.nc"
-            get_files = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
+            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
                                              password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,force_download='Y',overwrite_output_data='Y')
+                                             filter=date_range,overwrite='Y')
             
-            exf,ff = Library.ExistingFile(get_files[0],ddate[nf])
+            for file in query_metadata.files:
+                get_files = file.file_path
+            exf,ff = Library.ExistingFile(get_files,ddate[nf])
             
             if len(kwargs)==0 or 'cp' in kwargs:
                 # copying data in /Wrk
@@ -370,11 +373,14 @@ class Copernicus_PHY_WIND(Load,Create):
             # dowloading data in /DATA
             date_range = "*/" + year[nf] + "/" + mo[nf] +\
                 "/cmems_obs-wind_glo_phy_nrt_l4_0.125deg_PT1H_" + ddate[nf] + "_*.nc"
-            get_files = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
+            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
                                              password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,force_download='Y',overwrite_output_data='Y')
+                                             filter=date_range,overwrite='Y')
             
-            exf,ff = Library.ExistingFile(get_files[0],ddate[nf])
+            for file in query_metadata.files:
+                get_files = file.file_path
+            exf,ff = Library.ExistingFile(get_files,ddate[nf])
+            
             if len(kwargs)==0 or 'cp' in kwargs:
                 # copying data in /Wrk
                 req_cp = "cp " + ff +' '+ var['dir_wrk'] + ddate[nf] + "_" + var['prod'] + '.nc'
@@ -391,7 +397,7 @@ class Copernicus_SST_L4(Load,Create):
         self.var_name = 'analysed_sst'
         self.var_units = 'Kelvin'
         self.K = True
-        self.cmap = cm_oc.cm.thermal
+        self.cmap = cb.cbmap("cb.iris_r")
     
     def download():       
         # setting global variables to local for a shorter req
@@ -402,11 +408,13 @@ class Copernicus_SST_L4(Load,Create):
             # dowloading data in /DATA
             date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + "/" + var['date'][nf] + \
                 "120000-UKMO-L4_GHRSST-SSTfnd-OSTIA-GLOB-v02.0-fv02.0.nc"
-            get_files = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
+            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
                                              password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,force_download='Y',overwrite_output_data='Y')
+                                             filter=date_range,overwrite='Y')
             
-            exf,ff = Library.ExistingFile(get_files[0],var['date'][nf])
+            for file in query_metadata.files:
+                get_files = file.file_path
+            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
             # copying data in /Wrk and rename
             if ff:
                 req_cp = "cp " + ff +' '+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + '.nc'
@@ -423,7 +431,7 @@ class Copernicus_SST_BAL_L4(Load,Create):
         self.var_name = 'analysed_sst'
         self.var_units = 'Kelvin'
         self.K = True
-        self.cmap = cm_oc.cm.thermal
+        self.cmap = cb.cbmap("cb.iris_r")
     
     def download():       
         # setting global variables to local for a shorter req
@@ -434,11 +442,13 @@ class Copernicus_SST_BAL_L4(Load,Create):
             # dowloading data in /DATA
             date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + "/" + var['date'][nf] + \
                 "000000-DMI-L4_GHRSST-SSTfnd-DMI_OI-NSEABALTIC-v02.0-fv01.0.nc"
-            get_files = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
+            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
                                              password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,force_download='Y',overwrite_output_data='Y')
+                                             filter=date_range,overwrite='Y')
             
-            exf,ff = Library.ExistingFile(get_files[0],var['date'][nf])
+            for file in query_metadata.files:
+                get_files = file.file_path
+            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
             # copying data in /Wrk and rename
             if ff:
                 req_cp = "cp " + ff +' '+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + '.nc'
@@ -469,11 +479,13 @@ class Copernicus_SSS_L4(Load,Create):
             # dowloading data in /DATA
             date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + "/" + \
                 "dataset-sss-ssd-nrt-daily_"+var['date'][nf]+"T*.nc"
-            get_files = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
+            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
                                              password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,force_download='Y',overwrite_output_data='Y')
+                                             filter=date_range,overwrite='Y')
             
-            exf,ff = Library.ExistingFile(get_files[0],var['date'][nf])
+            for file in query_metadata.files:
+                get_files = file.file_path
+            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
             # copying data in /Wrk and rename
             if ff:
                 req_cp = "cp " + ff +' '+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + '.nc'
@@ -501,11 +513,13 @@ class Copernicus_CHL_L3(Load,Create):
             # dowloading data in /DATA
             date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + "/" + var['date'][nf] + \
                 "_cmems_obs-oc_glo_bgc-plankton_nrt_l3-multi-4km_P1D.nc"
-            get_files = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
+            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
                                              password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,force_download='Y',overwrite_output_data='Y')
+                                             filter=date_range,overwrite='Y')
             
-            exf,ff = Library.ExistingFile(get_files[0],var['date'][nf])
+            for file in query_metadata.files:
+                get_files = file.file_path
+            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
             # copying data in /Wrk
             if ff:
                 req_cp = "cp " + ff+' '+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + '.nc'
@@ -521,7 +535,7 @@ class Copernicus_CHL_L4(Load,Create):
         self.d3_name = 'time'
         self.var_name = 'CHL'
         self.var_units = 'mg/m3'
-        self.cmap = 'YlGnBu_r'
+        self.cmap = 'Greens'
         self.colnorm = 'PowerNorm'
 
     def download():
@@ -533,11 +547,13 @@ class Copernicus_CHL_L4(Load,Create):
             # dowloading data in /DATA
             date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + "/" + var['date'][nf] + \
                 "_cmems_obs-oc_glo_bgc-plankton_nrt_l4-gapfree-multi-4km_P1D.nc"
-            get_files = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
+            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
                                              password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,force_download='Y',overwrite_output_data='Y')
+                                             filter=date_range,overwrite='Y')
             
-            exf,ff = Library.ExistingFile(get_files[0],var['date'][nf])
+            for file in query_metadata.files:
+                get_files = file.file_path
+            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
             # copying data in /Wrk
             if ff:
                 req_cp = "cp " + ff +' '+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + '.nc'
@@ -565,11 +581,13 @@ class Copernicus_CHL_L4_DT(Load,Create):
             # dowloading data in /DATA
             date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + "/" + var['date'][nf] + \
                 "_cmems_obs-oc_glo_bgc-plankton_myint_l4-gapfree-multi-4km_P1D.nc"
-            get_files = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
+            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
                                              password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,force_download='Y',overwrite_output_data='Y')
+                                             filter=date_range,overwrite='Y')
             
-            exf,ff = Library.ExistingFile(get_files[0],var['date'][nf])
+            for file in query_metadata.files:
+                get_files = file.file_path
+            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
 
             # copying data in /Wrk
             if ff:
@@ -598,11 +616,13 @@ class Copernicus_CHL_BAL(Load,Create):
             # dowloading data in /DATA
             date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + "/" + var['date'][nf] + \
                 "_cmems_obs-oc_bal_bgc-plankton_nrt_l3-olci-300m_P1D.nc"
-            get_files = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
+            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
                                              password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,force_download='Y',overwrite_output_data='Y')
+                                             filter=date_range,overwrite='Y')
             
-            exf,ff = Library.ExistingFile(get_files[0],var['date'][nf])
+            for file in query_metadata.files:
+                get_files = file.file_path
+            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
             # copying data in /Wrk
             if ff:
                 req_cp = "cp " + ff+' '+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + '.nc'
@@ -634,11 +654,13 @@ class Copernicus_MEDSEA_WAVF(Load,Create):
             # dowloading data in /DATA
             date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + "/" + var['date'][nf] + \
                 "12_h-HCMR--WAVE-MEDWAM4-MEDATL-*.nc"
-            get_files = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
+            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
                                              password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,force_download='Y',overwrite_output_data='Y')
+                                             filter=date_range,overwrite='Y')
             
-            exf,ff = Library.ExistingFile(get_files[0],var['date'][nf])
+            for file in query_metadata.files:
+                get_files = file.file_path
+            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
             # copying data in /Wrk
             if ff:
                 req_cp = "cp " + ff + ' '+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + '.nc'
@@ -1000,9 +1022,9 @@ class FTLE(Load,Create):
         thresh = float(GlobalVars.config.get('plot_param','ftlethresh'))
         fmax = [float(x) for x in GlobalVars.config.get('plot_param','ftlemax').split(',')]
         if np.isnan(thresh):
-            self.cmap = 'ocean_r'
+            self.cmap = 'binary'
         else:
-            oce = cm.get_cmap('ocean_r', 256)
+            oce = cm.get_cmap('binary', 256)
             newcolors = oce(np.linspace(0, 1, 256))
             whi = np.array([1, 1, 1, 1])
             nb = int(256/(fmax[0]/thresh))
@@ -1064,7 +1086,7 @@ class OW(Load,Create):
         self.d3_name = 'time'
         self.var_name = 'ow'
         self.var_units = 'd$^{-2}$'
-        self.cmap = 'RdBu_r'
+        self.cmap = cb.cbmap("cb.bird_r")
         self.tit = 'Okubo-Weiss parameter'
     
 class KE(Load,Create):

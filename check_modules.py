@@ -13,7 +13,7 @@ import importlib
 module_name = ['termcolor','pandas','netCDF4', 'motuclient', 'matplotlib',
                'cmocean','scipy','xarray','basemap','basemap-data-hires',
                'tabulate','simplekml','requests','importlib-metadate',
-               'pylatex','copernicusmarine']
+               'pylatex','copernicusmarine','cblind']
 list_installed = []
 list_notinstalled = []
 
