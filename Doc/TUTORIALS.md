@@ -19,6 +19,7 @@ below starts from the most simple and standard configuration example WMedSeaExam
 ## Standard SPASSO run
 - recap to run
 - images outputs:
+  
 ![20250121_Copernicus_PHY_0](https://github.com/user-attachments/assets/afd4a7e5-f38e-48a3-9f3e-09c72dc12cd8)
 ![20250120_Copernicus_SST_L4_0](https://github.com/user-attachments/assets/00d07569-34d1-435e-9f77-7622105ba3a0)
 ![20250119_Copernicus_CHL_L4_0](https://github.com/user-attachments/assets/6a196f43-e989-4b01-a162-210271c3d2b3)
