@@ -4,7 +4,7 @@ The following is a set of tutorials to help users to get more familiar with SPAS
 and how to change parameters and options from the config.ini file. All the examples
 below starts from the most simple and standard configuration example WMedSeaExample.
 
-> Users can find full description of the parameters defined in the config.ini file [here](SPASSO/config.ini)
+> Users can find full description of the parameters defined in the config.ini file [here](https://github.com/OceanCruises/SPASSO/blob/main/config.ini)
 
 #### Table Of Contents
 
