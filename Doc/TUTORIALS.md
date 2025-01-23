@@ -99,3 +99,6 @@ local@ubuntu: clear; python3 Spasso.py WMedSeaExample
 > The satellite product used to compute the Lagrangian (and Eulerian) diagnostics <ins>MUST</ins> be defined in `products =` both in the `[products]` and `[Lagrangian]` sections. 
 
 ## Plot options
+Several basic options can be ploted on each SPASSO figures such as the positions of stations, waypoints or gliders:
+
+Output figure options: kml
