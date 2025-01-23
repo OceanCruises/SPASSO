@@ -75,5 +75,25 @@ local@ubuntu: clear; python3 Spasso.py WMedSeaExample
     <img src="https://github.com/user-attachments/assets/fc22e7b9-692d-407e-9c4e-31a7057242ec" width="200"><img src="https://github.com/user-attachments/assets/ef80ee60-35d3-459f-91da-884531c44d57" width="200">
 
 ## Other Lagrangian diagnostics
+- In the `config_WMedSeaExample.ini`, users can also find a list of other pre-defined Lagrangian diagnostics to compute. Please visit the [LAMTA github page](https://github.com/rousseletL/lamtaLR)  and the [Rousselet et al. (in rev)](https://hal.science/hal-04705438v1) for specific details on the Lagrangian diagnostics.
+    <img src="https://github.com/user-attachments/assets/dc41bca6-533c-42f3-b672-9b74a3ad0e2f" width="300">
+    - LLADV: Longitude/Latitude advection.
+    
+    <img src="https://github.com/user-attachments/assets/7ed1754f-80c9-4e6d-a4c9-17634eaf4d38" width="200"><img src="https://github.com/user-attachments/assets/dbd243e6-d467-4c64-92af-7f647c0b4c86" width="200">
+
+    - OWTRAJ: Retention parameter based on Okubo-Weiss parameter.
+ 
+    <img src="https://github.com/user-attachments/assets/c6e4a4b1-60cb-4b9f-a286-240e10ae8e22" width="200">
+
+    - TIMEFROMBATHY: Time elapsed since last contact with bathymetry.
+
+    <img src="https://github.com/user-attachments/assets/83395149-986b-4963-ab80-97fd022c8aaf" width="200"><img src="https://github.com/user-attachments/assets/917157a4-c979-4204-8b68-49819589184d" width="200"><img src="https://github.com/user-attachments/assets/cf56c798-b4bc-44eb-b11d-6567ec2367c9" width="200">
+
+    - SSTADV: Advection of SST field.
+
+    <img src="https://github.com/user-attachments/assets/4d761f29-10e4-4626-8482-65904e1bbd42" width="200">
+
+
+> The satellite product used to compute the Lagrangian (and Eulerian) diagnostics <ins>MUST</ins> be defined in `products =` both in the `[products]` and `[Lagrangian]` sections. 
 
 ## Plot options
