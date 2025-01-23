@@ -47,6 +47,14 @@ local@ubuntu: clear; python3 Spasso.py WMedSeaExample
 <img src="https://github.com/user-attachments/assets/23dc211b-fde1-4938-8c91-49ee8553d4a9" width="500">
 
 ## Other pre-defined satellite fields
+- In the `config_WMedSeaExample.ini`, users can find a list of other pre-defined satellite products that can be used:
+    - PHYTOT: Global NRT total currents (geostrophy + ekman). [DOI]( https://doi.org/10.48670/mds-00327)
+    - PHYEURO: European NRT Level-4 SSH and geostrophic currents. [DOI](https://doi.org/10.48670/moi-00142)
+    - PHY_WIND: Hourly NRT Level-4 sea surface wind and stress fields. [DOI](https://doi.org/10.48670/moi-00305)
+    - CHL_L3: Global chlorophyll-a NRT Level-3. [DOI](https://doi.org/10.48670/moi-00278)
+    - CHL_L4_DT: Global chlorophyll-a DT Level-4. [DOI](https://doi.org/10.48670/moi-00281)
+    - CHL_BAL: Regional Baltic Sea chlorophyll-a NRT Level-3. [DOI](https://doi.org/10.48670/moi-00294)
+    - MEDSEA_WAVF: Wave product of the Mediterranean Sea Forecasting System. [DOI](https://doi.org/10.25423/cmcc/medsea_analysisforecast_wav_006_017_medwam4)
 
 ## Other Lagrangian diagnostics
 

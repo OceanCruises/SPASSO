@@ -35,6 +35,7 @@ def init_prodDate():
         day5_ago = datetime.datetime.today() - datetime.timedelta(days=5)
         day6_ago = datetime.datetime.today() - datetime.timedelta(days=6)
         day7_ago = datetime.datetime.today() - datetime.timedelta(days=7)
+        day8_ago = datetime.datetime.today() - datetime.timedelta(days=8)
         day1_after = datetime.datetime.today() + datetime.timedelta(days=1)
         
         for pr in prod:

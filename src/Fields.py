@@ -247,7 +247,7 @@ class Copernicus_PHYTOT(Load,Create):
         self.u_units = 'm/s'
         self.v_units = 'm/s'
         self.dimz = '0'
-        self.cmap = plt.get_cmap('PRGn')
+        self.cmap = cb.cbmap("cb.pregunta_r")
         if 'dayv' in kwargs: 
             self.date = datetime.datetime.strptime(kwargs['dayv'],"%Y-%m-%d")
         else: 
@@ -292,7 +292,7 @@ class Copernicus_PHYEURO(Load,Create):
         self.v_name='vgos'
         self.u_units = 'm/s'
         self.v_units = 'm/s'
-        self.cmap = plt.get_cmap('PRGn')
+        self.cmap = cb.cbmap("cb.pregunta_r")
         if 'dayv' in kwargs: 
             self.date = datetime.datetime.strptime(kwargs['dayv'],"%Y-%m-%d")
         else: 
@@ -501,7 +501,7 @@ class Copernicus_CHL_L3(Load,Create):
         self.d3_name = 'time'
         self.var_name = 'CHL'
         self.var_units = 'mg/m3'
-        self.cmap = 'YlGnBu_r'
+        self.cmap = 'Greens'
         self.colnorm = 'PowerNorm'
     
     def download():
@@ -569,7 +569,7 @@ class Copernicus_CHL_L4_DT(Load,Create):
         self.d3_name = 'time'
         self.var_name = 'CHL'
         self.var_units = 'mg/m3'
-        self.cmap = 'YlGnBu_r'
+        self.cmap = 'Greens'
         self.colnorm = 'PowerNorm'
  
     def download():
@@ -604,7 +604,7 @@ class Copernicus_CHL_BAL(Load,Create):
         self.d3_name = 'time'
         self.var_name = 'CHL'
         self.var_units = 'mg/m3'
-        self.cmap = 'YlGnBu_r'
+        self.cmap = 'Greens'
         self.colnorm = 'PowerNorm'
  
     def download():
