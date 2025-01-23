@@ -19,6 +19,8 @@ below starts from the most simple and standard configuration example WMedSeaExam
 ## Standard SPASSO run
 - Run standard SPASSO config (in a terminal window):
 ```
+local@ubuntu: vi spasso2.0/Cruises/WMedSeaExample/config_WMedSeaExample.ini
+    > modify Library paths (L 322-324)
 local@ubuntu: cd spasso2.0/src/
 local@ubuntu: clear; python3 Spasso.py WMedSeaExample
 ```
