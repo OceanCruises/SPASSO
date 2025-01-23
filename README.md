@@ -56,11 +56,15 @@ write in a log fille, send email, copy files, clean directories, execute shell r
 ```
 cr=WMedSeaExample
 ```
-3. Change working directory to the source code repository:
+3. Edit the configuration file `Cruises/WMedSeaExample/config_WMedSeaExample.ini` and modify the motuclient library and LaTeX compiler paths to your local path:
+
+![Screenshot 2025-01-23 at 5 43 43 PM](https://github.com/user-attachments/assets/d1d84896-fb53-4582-b4f4-8a08d223581d)
+
+4. Change working directory to the source code repository:
 ```
 cd spasso2.0/src/
 ```
-4. Launch SPASSO:
+5. Launch SPASSO:
 ```
 clear; python3 Spasso.py $cr
 ```
