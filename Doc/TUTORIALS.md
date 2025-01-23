@@ -28,6 +28,8 @@ local@ubuntu: clear; python3 Spasso.py WMedSeaExample
 > call it using `python3 Spasso.py $cr`
 
 - Information about the run are printed on screen:
+<img src="https://github.com/user-attachments/assets/7bec355f-c73e-419a-b267-92acbc45929b" width="500">
+
 
 - Several directories are created in the cruise folder:
     - Bulletin: where bulletin file are stored
@@ -47,14 +49,30 @@ local@ubuntu: clear; python3 Spasso.py WMedSeaExample
 <img src="https://github.com/user-attachments/assets/23dc211b-fde1-4938-8c91-49ee8553d4a9" width="500">
 
 ## Other pre-defined satellite fields
-- In the `config_WMedSeaExample.ini`, users can find a list of other pre-defined satellite products that can be used:
+- In the `config_WMedSeaExample.ini`, users can find a list of other pre-defined satellite products that can be used. By modifying the list of `products` users can add/remove pre-defined satellite products to SPASSO run:
+    <img src="https://github.com/user-attachments/assets/8f0aaff7-8447-425e-b154-f7dd3609b127" width="500">
     - PHYTOT: Global NRT total currents (geostrophy + ekman). [DOI]( https://doi.org/10.48670/mds-00327)
+    <img src="https://github.com/user-attachments/assets/f7bc1d44-a3c0-4d32-b097-7a7b84203160" width="200">
+    
     - PHYEURO: European NRT Level-4 SSH and geostrophic currents. [DOI](https://doi.org/10.48670/moi-00142)
+    <img src="https://github.com/user-attachments/assets/1b7ea27b-b4d2-4214-91fe-b8c4b7bb1b2b" width="200">
+    
     - PHY_WIND: Hourly NRT Level-4 sea surface wind and stress fields. [DOI](https://doi.org/10.48670/moi-00305)
+    <img src="https://github.com/user-attachments/assets/00c4d98d-96b2-4eed-9a8d-07a917957925" width="200">
+
     - CHL_L3: Global chlorophyll-a NRT Level-3. [DOI](https://doi.org/10.48670/moi-00278)
+    <img src="https://github.com/user-attachments/assets/2cc416ed-bcdc-4360-8b53-680fb806035c" width="200">
+
     - CHL_L4_DT: Global chlorophyll-a DT Level-4. [DOI](https://doi.org/10.48670/moi-00281)
+    <img src="https://github.com/user-attachments/assets/0be861cd-acc0-4ba0-afd3-bfde94f825eb" width="200">
+
     - CHL_BAL: Regional Baltic Sea chlorophyll-a NRT Level-3. [DOI](https://doi.org/10.48670/moi-00294)
+    <img src="https://github.com/user-attachments/assets/d3c183cb-03b6-4a6a-95db-6fe6fb59b29f" width="200">
+
     - MEDSEA_WAVF: Wave product of the Mediterranean Sea Forecasting System. [DOI](https://doi.org/10.25423/cmcc/medsea_analysisforecast_wav_006_017_medwam4)
+
+    <img src="https://github.com/user-attachments/assets/747c92b9-f44e-426f-97db-07748a82da18" width="200"><img src="https://github.com/user-attachments/assets/68e26453-d5bc-4b69-a76b-ca2af633577f" width="200">
+    <img src="https://github.com/user-attachments/assets/fc22e7b9-692d-407e-9c4e-31a7057242ec" width="200"><img src="https://github.com/user-attachments/assets/ef80ee60-35d3-459f-91da-884531c44d57" width="200">
 
 ## Other Lagrangian diagnostics
 
