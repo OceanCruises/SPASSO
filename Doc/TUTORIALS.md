@@ -78,6 +78,7 @@ local@ubuntu: clear; python3 Spasso.py WMedSeaExample
 
 ## Other Lagrangian diagnostics
 - In the `config_WMedSeaExample.ini`, users can also find a list of other pre-defined Lagrangian diagnostics to compute. Please visit the [LAMTA github page](https://github.com/rousseletL/lamtaLR)  and the [Rousselet et al. (in rev)](https://hal.science/hal-04705438v1) for specific details on the Lagrangian diagnostics.
+
     <img src="https://github.com/user-attachments/assets/dc41bca6-533c-42f3-b672-9b74a3ad0e2f" width="300">
     - LLADV: Longitude/Latitude advection.
     
@@ -99,6 +100,22 @@ local@ubuntu: clear; python3 Spasso.py WMedSeaExample
 > The satellite product used to compute the Lagrangian (and Eulerian) diagnostics <ins>MUST</ins> be defined in `products =` both in the `[products]` and `[Lagrangian]` sections. 
 
 ## Plot options
-Several basic options can be ploted on each SPASSO figures such as the positions of stations, waypoints or gliders:
+Several basic options, defined in the `config_WMedSeaExample.ini`, can be ploted on each SPASSO figures (L 273).
+- Station, waypoint positions:
+  ```
+  [plot_options]
+  options = stations,waypoints
+  ```
+  > The details of each `options` are defined in corresponding sections.
 
-Output figure options: kml
+    <img src="https://github.com/user-attachments/assets/22a49148-96e8-4048-a75e-e282842765d1" width="200">
+
+- Glider trajectories from file:
+  Example not reproducable because glider data cannot be shared. However this example illustrates how SPASSO can read glider netcdf files and plot glider trajectories.
+
+    <img width="300" alt="Screenshot 2025-01-24 at 9 51 52 AM" src="https://github.com/user-attachments/assets/7aa96146-d455-4448-880e-0f9020676b4b" /><br/>
+    
+    <img src="https://github.com/user-attachments/assets/6b09f865-d79d-44a1-b73f-af7cfb35b17a" width="200">
+
+
+- Output figure options: kml
