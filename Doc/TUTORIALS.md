@@ -110,12 +110,19 @@ Several basic options, defined in the `config_WMedSeaExample.ini`, can be ploted
 
     <img src="https://github.com/user-attachments/assets/22a49148-96e8-4048-a75e-e282842765d1" width="200">
 
-- Glider trajectories from file:
-  Example not reproducable because glider data cannot be shared. However this example illustrates how SPASSO can read glider netcdf files and plot glider trajectories.
+- Glider trajectories from file:\
+  :warning: Example not reproducible because glider data cannot be shared. However this example illustrates how SPASSO can read glider netcdf files and plot glider trajectories.
 
     <img width="300" alt="Screenshot 2025-01-24 at 9 51 52 AM" src="https://github.com/user-attachments/assets/7aa96146-d455-4448-880e-0f9020676b4b" /><br/>
     
     <img src="https://github.com/user-attachments/assets/6b09f865-d79d-44a1-b73f-af7cfb35b17a" width="200">
 
 
-- Output figure options: kml
+- Output figure options:\
+  Default figure output format is png but users can require kml output format to open figures in Google Earth (L 276).
+  ```
+  [plot_options]
+  options             = 
+  outopt              = kml
+  ```
+> When kml option is set, figures are still saved in png.
