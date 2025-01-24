@@ -80,6 +80,7 @@ local@ubuntu: clear; python3 Spasso.py WMedSeaExample
 - In the `config_WMedSeaExample.ini`, users can also find a list of other pre-defined Lagrangian diagnostics to compute. Please visit the [LAMTA github page](https://github.com/rousseletL/lamtaLR)  and the [Rousselet et al. (in rev)](https://hal.science/hal-04705438v1) for specific details on the Lagrangian diagnostics.
 
     <img src="https://github.com/user-attachments/assets/dc41bca6-533c-42f3-b672-9b74a3ad0e2f" width="300">
+    
     - LLADV: Longitude/Latitude advection.
     
     <img src="https://github.com/user-attachments/assets/7ed1754f-80c9-4e6d-a4c9-17634eaf4d38" width="200"><img src="https://github.com/user-attachments/assets/dbd243e6-d467-4c64-92af-7f647c0b4c86" width="200">
