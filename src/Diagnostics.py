@@ -1,3 +1,17 @@
+"""
+Lagrangian and Eulerian diagnostics computation.
+
+Three classes are defined:
+    - Lagrangian: includes code to compute particle trajectories and derived
+    diagnostics
+    - Eulerian: includes code to compute Eulerian diagnostics from velocity 
+    field
+    - ParticleSet: includes code to initialize numerical particle before
+    advection
+
+@author: lrousselet
+"""
+
 from scipy.interpolate import interp2d,interpn,dfitpack
 import numpy as np
 import datetime as dt
@@ -61,6 +75,13 @@ class Lagrangian():
         return out
     
     def backonsphere(self,x,y):
+        """
+        Returns
+        -------
+        New particle x,y positions when they reach domain boundary.
+        Used when Periodic boundary is set to True and coordinates set to
+        spherical.
+        """
         x = np.array(x).astype('float64')
         y = np.array(y).astype('float64')
         
@@ -85,6 +106,22 @@ class Lagrangian():
         return x,y
 
     def interpf(self,t,x,y,**kwargs):
+        """
+        Velocity field interpolation at particle position using interpn function.
+
+        Parameters
+        ----------
+        t : time
+        x : particle x position
+        y : particle y position
+        **kwargs : coordinates
+
+        Returns
+        -------
+        u_in : u interpolated value at particle position.
+        v_in : v interpolated value at particle position.
+
+        """
         udim, vdim = np.asarray(self.u_nonan), np.asarray(self.v_nonan)
         if np.size(t)!=np.size(x):
             t = np.tile(t,len(x))
@@ -111,7 +148,8 @@ class Lagrangian():
         return u_in,v_in
     
     def interp2d_pairs(*args,**kwargs):
-        """ Same interface as interp2d but the returned interpolant will evaluate its inputs as pairs of values.
+        """ Same interface as interp2d but the returned interpolant will evaluate 
+        its inputs as pairs of values.
         """
         # Internal function, that evaluates pairs of values, output has the same shape as input
         def interpolant(x,y,f):
@@ -137,6 +175,20 @@ class Lagrangian():
         return x_n,y_n
 
     def rk1flat(self,f,Nstep,**kwargs):
+        """
+        First order Runga-Kutta method
+
+        Parameters
+        ----------
+        f : interpolation function (default is interpf)
+        Nstep : number of step
+
+        Returns
+        -------
+        trjf : dictionnary including particle trajectories: trjx, trjy
+                                     particle initial positions: lons, lats
+                                     particle final positions: lonf, latf
+        """
         t_v = self.pt
         x = self.px
         y = self.py
@@ -159,12 +211,26 @@ class Lagrangian():
         return trjf
 
     def rk4flat(self,f,Nstep,**kwargs):
+        """
+        Fourth order Runga-Kutta method
+
+        Parameters
+        ----------
+        f : interpolation function (default is interpf)
+        Nstep : number of step
+
+        Returns
+        -------
+        trjf : dictionnary including particle trajectories: trjx, trjy, trjt
+                                     particle initial positions: lons, lats
+                                     particle final positions: lonf, latf
+        """
         t_v = self.pt
         x = self.px
         y = self.py
         trjx,trjy,trjt = ([] for i in range(3))
 #            if (key == 'noise'):
-#                noise=value    #Not yet implemented; see field.h       
+#                noise=value    #Not yet implemented;     
         if np.size(np.shape(t_v))==1:
             h = (t_v[1]-t_v[0])/(Nstep*self.numdays)
         else:
@@ -189,9 +255,11 @@ class Lagrangian():
 
     def LLADV(self,trjf,**kwargs):
         """ Compute Lon/Lat advections
-        :param trj: particle trajectories from advection (returned from 'method')
+        :param trj: dictionnary with particle trajectories from advection 
         
-        :output lladv: lons/lats are longitudes and latitudes for mapping; lonf_map and latf_map are longitude and latitude advections respectively formatted for mapping.
+        :output lladv: lons/lats are longitudes and latitudes for mapping; 
+        lonf_map and latf_map are longitude and latitude advections respectively 
+        formatted for mapping.
         """
         if 'Library' in sys.modules.keys():
             Library.tic()
@@ -333,6 +401,20 @@ class Lagrangian():
         return sstadv
     
     def FTLE(self,trjf,**kwargs):
+        """
+        Compute Finite Time Lyapunov Exponents from initial and final positions
+        of computed particle trajectories.
+
+        Parameters
+        ----------
+        trjf : dictionnary including particle trajectories, initial and final
+        positions.
+
+        Returns
+        -------
+        ftle : dictionnary with lon/lat grid (lons/lats) and gridded values of FTLE.
+
+        """
         lons = trjf['lons']
         lats = trjf['lats']
         lonf = trjf['lonf']
@@ -393,6 +475,23 @@ class Lagrangian():
         return ftle
     
     def OWTRAJ(self,trjf,**kwargs):
+        """
+        Compute Okubo-Weiss parameter along each particle trajectories.
+        Identify consecutive negative values of Okubo-Weiss and compute a gridded
+        mean time (i.e. retention parameter) of consecutive negative Okubo-Weiss 
+        values over the domain.
+
+        Parameters
+        ----------
+        trjf : dictionnary including particle trajectories, initial and final
+        positions.
+        
+        Returns
+        -------
+        owdisp : dictionnary including lon/lat grid (lons/lats) and gridded value
+        of the retention parameter.
+
+        """
         if 'Library' in sys.modules.keys():
             Library.tic() 
         
@@ -477,6 +576,22 @@ class Lagrangian():
         return owdisp
     
     def TIMEFROMBATHY(self,trjf,**kwargs):
+        """
+        Computed gridded mean time since particle last contact over a specified
+        bathymetry value.
+
+        Parameters
+        ----------
+        trjf : dictionnary including particle trajectories, initial and final
+        positions.
+
+        Returns
+        -------
+        timfbathy : dictionnary including lon/lat griid, gridded time from 
+        bathymetry (timfb), gridded intial longitude (lonfb)/latitude (latfb) 
+        of the particle when they were over the specified bathymetry value.
+
+        """
         lons = trjf['lons']
         lats = trjf['lats']
         trjx = np.asarray(trjf['trjx'])
@@ -560,6 +675,16 @@ class Lagrangian():
     
 
 class ParticleSet(Lagrangian):
+    """
+    Set particle initialization parameters.
+        - from_input: particles are initialized on the position (px, py) and 
+        time defined by the user
+        - from_grid: particles initialized on a grid defined by longitude min,
+        longitude max et delta step.
+    
+    Default parameter to compute Lagrangian diagnostics from satellite velocity
+    field is from_grid.
+    """
     def __init__(self,pt=None,px=None,py=None,lons=None,lats=None,numdays=None,loni=None,lati=None,delta0=None,dayv=None,**kwargs):
         self.pt = pt
         self.px = px
@@ -699,6 +824,9 @@ class ParticleSet(Lagrangian):
         return
 
 class Eulerian():
+    """
+    Compute Eulerian diagnostic from velocity field input.
+    """
     def __init__(self,fieldset=None,dayv=None):
         self.RT = 6371e5
         if fieldset!=None:

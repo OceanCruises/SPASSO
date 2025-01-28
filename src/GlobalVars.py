@@ -1,4 +1,18 @@
-import configparser  # pour recuperer variable dans fichier config.ini
+"""
+Define Global Variables used to run SPASSO:
+    - satellite product dates (init_prodDate)
+    - data directory paths to be stored locally (init_DataDir)
+    - SPASSO run directory paths (Bulletin/, Figures/, Processed, Wrk/) (Directories)
+    - Read parameters from the config.ini file:
+        - Diagnostics parameters (Eulerian and Lagrangian) (DiagParam)
+        - Email parameters (EmailParam)
+        - Figure parameters (FigParam)
+        - Bulletin parameters (BulletinParam)
+        - Library local paths (LibraryPaths)
+
+@author: lrousselet
+"""
+import configparser  # to get variables in config.ini
 from termcolor import cprint
 import sys
 import datetime
@@ -8,6 +22,12 @@ import Library
 
 ##########################################
 def init_prodDate():
+    """
+    Returns
+    -------
+    all_dates: Dictionnary with the date (in datetime) for each satellite product as defined
+    in the config.ini
+    """
     global all_dates
     global current_date_for_bulletin    
     

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Code to plot all SPASSO figures from satellite and diagnostic fields.
 Created on Wed Jun  1 11:41:58 2022
 
 @author: lrousselet
@@ -139,129 +140,16 @@ class PlotField():
         return
     
     def Plot(cruise,Field, *args, **kwargs):
-        def MedZONEX(mymap,ii,nc,**kwargs):
-            col =['r','k']
-            lin = ['dashed','solid']
-            wid = [0.5,0.5]
-            rep = str(GlobalVars.config.get('MedZONEX','direct'))
-            files = sorted(glob.glob(GlobalVars.Dir['dir_data']+rep+'/*.shp'))
-            co=0
-            for ff in files:
-                res = mymap.readshapefile(ff[:-4],\
-                                        os.path.basename(ff[:-4]),color=col[co],linewidth=wid[co])
-                seg = res[-1]
-                seg.set_linestyle(lin[co])
-                co = co+1
-            
-            return
-        
-        def AlgEEZ(mymap,ii,nc,**kwargs):
-            rep = str(GlobalVars.config.get('AlgEEZ','direct'))
-            listf = glob.glob(GlobalVars.Dir['dir_data']+rep+'/*.shp')
-            for ff in listf:
-                res = mymap.readshapefile(ff[:-4],ff[:-4],color='k',linewidth=0.5)
-                seg = res[-1]
-                seg.set_linestyle('--')
+        """
+        Plotting functions.
 
-            return
-
-        def SMODEb(mymap,ii,nc,**kwargs):
-            """ Add polygon to show S-MODE IOP2 operations area."""
-                
-            coord = [[38.342, -126.25], [37.707, -123.99], [37.75, -123.354], [37.00, -122.92], [36.337, -124.36], [36.00, -124.16],[35.60, -125.515]]
-            coord.append(coord[0]) #repeat the first point to create a 'closed loop'
-            
-            ys, xs = zip(*coord) #create lists of x and y values
-            x,y = mymap(xs,ys)
-            mymap.plot(x,y,color='r',linewidth=1,zorder=3)
-            # mark a known place to help us geo-locate ourselves
-            SF_lon=-(122+25/60)
-            SF_lat= 37+60/60
-            xSF,ySF = mymap(SF_lon,SF_lat)
-            txSF,tySF = mymap(SF_lon-5/60, SF_lat+5/60)
-            mymap.plot(xSF,ySF, 'o',color='k',markersize=3, zorder=3)
-            plt.annotate('San Francisco', xy=(txSF,tySF))
-            return
+        Parameters
+        ----------
+        cruise : cruise name and parameters.
+        Field : field to plot on figure.
         
-        def moorings(mymap,ii,nc,**kwargs):
-            lon = [float(x) for x in GlobalVars.config.get('moorings','lon').split(',')]
-            lat = [float(x) for x in GlobalVars.config.get('moorings','lat').split(',')]
-            x,y = mymap(lon,lat)
-            mymap.plot(x,y,'x',color='r',zorder=1)
-            return
-        
-        def Locations(mymap,ii,nc,**kwargs):
-            lon = [float(x) for x in GlobalVars.config.get('Locations','lon').split(',')]
-            lat = [float(x) for x in GlobalVars.config.get('Locations','lat').split(',')]
-            col = [str(x) for x in GlobalVars.config.get('Locations','col').split(',')]
-            x,y = mymap(lon,lat)
-            for jj in range(0,len(col)):
-                mymap.plot(x[jj],y[jj],'x',color=col[jj],zorder=1)
-            return
-        
-        def Transects(mymap,ii,nc,**kwargs):
-            file = [str(x) for x in GlobalVars.config.get('Transects','file').split(',')]
-            col = [str(x) for x in GlobalVars.config.get('Transects','col').split(',')]
-            for jj in range(len(file)):
-                x,y = [],[]
-                filei = glob.glob(GlobalVars.Dir['dir_data']+'TRANSECTS/'+
-                              GlobalVars.Param['cruise']+'/'+file[jj])[0]
-                with open(filei,'r') as f:
-                    for line in f:
-                        xtmp, ytmp, ztmp = line.split()
-                        x.append(float(xtmp))
-                        y.append(float(ytmp))
-                xx,yy = mymap(x,y)
-                mymap.plot(xx,yy,'-',color=col[jj],zorder=1,linewidth=1.5,label=file[jj])
-        
-            return
-        
-        def LIONmooring(mymap,ii,nc,**kwargs):
-            lon = [float(x) for x in GlobalVars.config.get('LIONmooring','lon').split(',')]
-            lat = [float(x) for x in GlobalVars.config.get('LIONmooring','lat').split(',')]
-            x,y = mymap(lon,lat)
-            mymap.plot(x,y,'x',color='r',zorder=1)
-            return
-        
-        def MooseT02(mymap,ii,nc,**kwargs):
-            lon = [float(x) for x in GlobalVars.config.get('MooseT02','lon').split(',')]
-            lat = [float(x) for x in GlobalVars.config.get('MooseT02','lat').split(',')]
-            x,y = mymap(lon,lat)
-            mymap.plot(x,y,'--',color='r',zorder=1,linewidth=0.8)
-            return
-        
-        def delmar(mymap,ii,nc,**kwargs):
-            col =['k','r','orange','m','b','k','k']
-            lin = ['dashed','solid','solid','solid','solid','dashed','dotted']
-            wid = [0.5,0.5,0.5,0.5,0.5,0.5,0.5]
-            rep = str(GlobalVars.config.get('delmar','direct'))
-            listf = sorted(glob.glob(GlobalVars.Dir['dir_data']+rep))
-            co=0
-            for i in listf:
-                if not i.startswith('.'):
-                    file = glob.glob(i+'/SHAPE/*.shp')
-                    res = mymap.readshapefile(file[0][:-4],\
-                                        os.path.basename(file[0][:-4]),color=col[co],linewidth=wid[co])
-                    seg = res[-1]
-                    seg.set_linestyle(lin[co])
-                    co = co+1
-            return
-        
-        def ZEE(mymap,ii,nc,**kwargs):
-            files = [str(x) for x in GlobalVars.config.get('ZEE','files').split(',')]
-            for f in files:
-                fname = GlobalVars.Dir['dir_data']+'ZEE/'+f+'.txt'
-                with open(fname,'r') as data:
-                    x = []
-                    y = []
-                    for line in data:
-                        p = line.split(',')
-                        x.append(float(p[0]))
-                        y.append(float(p[1]))
-                    xx,yy = mymap(x,y)
-                    mymap.plot(xx,yy,'-',color='k',zorder=1,linewidth=0.5);
-            return
-        
+        def : list of options that can be plotted on figure
+        """        
         def SWOTswath(mymap,ii,nc,**kwargs):
             file = str(GlobalVars.config.get('SWOTswath','file'))
             swath = sio.loadmat(GlobalVars.Dir['dir_data']+'SWOT/'+file)
@@ -377,6 +265,7 @@ class PlotField():
         nb_domain = GlobalVars.config.getint('cruise_param','nb_domain')
         nc = 0
 
+        # loop over the fields to plot
         for nf in fprod:
             if 'dayv' in kwargs:
                 dayv = datetime.strftime(

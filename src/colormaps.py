@@ -1,3 +1,13 @@
+"""
+Set of colormaps that can be used in for SPASSO figures.
+Usage in Fields.py :
+    import colormaps as cmaps
+    
+    class Copernicus_PHY(Load,Create): 
+        self.cmap = cmaps.viridis
+
+@author: lrousselet
+"""
 # New matplotlib colormaps by Nathaniel J. Smith, Stefan van der Walt,
 # and (in the case of viridis) Eric Firing.
 #
@@ -12,8 +22,6 @@
 # You should have received a copy of the CC0 legalcode along with this
 # work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-# import colormaps as cmaps
-# plt.imshow(my_image, cmap=cmaps.viridis)
 
 __all__ = ['magma', 'inferno', 'plasma', 'viridis', 'parula']
 

@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Defined functions that can be useful in SPASSO configuration:
+    - climatology: compute a climatology from satellite date.
+    - SWOT_passing_time: find passing time of SWOT during the CalVal orbit 
+    
 Created on Thu Jun 16 14:25:16 2022
 
 @author: lrousselet

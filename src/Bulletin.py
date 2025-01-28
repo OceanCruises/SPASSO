@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Script to create a LaTeX document including SPASSO current run
+figures, and some basic information on the Eulerian/Lagrangian diagnostics.
+
+The document includes several sections by default:
+    1. Ongoing operations and upcoming stations: to be filled by on-land users 
+       after SPASSO figure analysis to suggest up-coming sampling strategy.
+    2. Daily Figure analysis: subsection including all the figures produced
+       during SPASSO run
 Created on Wed Jan  4 09:42:19 2023
 
 @author: lrousselet

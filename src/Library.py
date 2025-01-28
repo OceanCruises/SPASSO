@@ -1,5 +1,20 @@
 #!/usr/bin/python3
-
+"""
+List of required functions used in SPASSO run:
+    - Printing information on screen:
+        - Done, printMessage, printInfo, printMainMessage, welcomeMessage
+    - Create and write a Log file: Logfile, ListProducts
+    - Define cruise
+    - exit program with error message
+    - Check if file already exit: ExistingFile
+    - Clean working directory: clean_wrk
+    - Create a dictionnary with all parameters for a specific field: GetVars
+    - Send email: send_email
+    - Copying files from working directory to specific directories (Figures/, 
+    Processed, Bulletin/): copy_files
+    - Create kml output files: make_kml
+    
+"""
 from termcolor import cprint
 import os
 from os.path import basename
@@ -312,116 +327,6 @@ def toc(comment):
     else:
         txt = "Toc: start time not set"
     Logfile(txt)
-
-
-def get_SEN3json(datef,id0,id1):
-    """
-    Get products id and full name for sentinel3 data
-    product date depends on satellite passing time
-    so an adjustement window over the product time is required (dday1, dday2)
-    """
-    
-    def get_url(dday1,dday2,id0,id1,**kwargs):
-        url = "https://catalogue.dataspace.copernicus.eu/odata/v1/Products?$filter=contains(Name,'S3') "\
-        +"and contains(Name,'_OL_2_WFR____') and contains(Name,'179_"+id0+"_') and contains(Name,'_"+id1+"_MAR_O_NR_003.SEN3')"\
-            +" and ContentDate/Start gt "+dday1+" and ContentDate/Start lt "+dday2
-        
-        if 'Namenb' in kwargs:
-            url = "https://catalogue.dataspace.copernicus.eu/odata/v1/Products?$filter=contains(Name,'S3') "\
-            +"and contains(Name,'_OL_2_WFR____') and contains(Name,'"+kwargs['Namenb']+"_"+id0+"_') and contains(Name,'_"+id1+"_MAR_O_NR_003.SEN3')"\
-                +" and ContentDate/Start gt "+dday1+" and ContentDate/Start lt "+dday2
-    
-        r = requests.get(url)
-        data = r.json()
-        value = data['value']
-        return value
-    
-    datet = datetime.datetime.strptime(datef,'%Y%m%d').date()
-    refd = datetime.date(2023,3,22)
-    refh = datetime.datetime.strptime('0930','%H%M')
-    deltad = (datet-refd).days
-    hd1 = refh - (datetime.timedelta(minutes=1)*deltad) #one minute delay every day
-    hd2 = hd1 + datetime.timedelta(minutes=45)
-    shd1 = datetime.datetime.strftime(hd1,'%H:%M:%S')
-    shd2 = datetime.datetime.strftime(hd2,'%H:%M:%S')
-    dday1 = datetime.datetime.strftime(datet,'%Y-%m-%d')+'T'+shd1+'.000Z'
-    dday2 = datetime.datetime.strftime(datet,'%Y-%m-%d')+'T'+shd2+'.000Z'
-    
-    value = get_url(dday1,dday2,id0,id1)
-    
-    if value:
-        idp = value[0]['Id']
-        name = value[0]['Name']
-    else:
-        hd2 = hd2 + datetime.timedelta(minutes=45)
-        shd2 = datetime.datetime.strftime(hd2,'%H:%M:%S')
-        dday2 = datetime.datetime.strftime(datet,'%Y-%m-%d')+'T'+shd2+'.000Z'
-        value = get_url(dday1,dday2,id0,id1)
-        if value:
-            idp = value[0]['Id']
-            name = value[0]['Name']
-        else:
-            value = get_url(dday1,dday2,id0,id1,Namenb='180')
-            if value:
-                idp = value[0]['Id']
-                name = value[0]['Name']
-            else:
-                idp,name = None,None
-    
-    return idp,name
-
-def CreateSEN3(var):
-    for nf in range(len(var['date'])):
-        for id0 in var['id0']:
-            for id1 in var['id1']:
-                exf,ff=ExistingFile(var['direct']+"/"+var['date'][nf]+"_"+id0+"_geo_coordinates_"+id1+".nc",var['date'][nf])
-                if ff:
-                    file = Dataset(var['direct']+"/"+var['date'][nf]+"_"+id0+"_geo_coordinates_"+id1+".nc")
-                    lon = file.variables['longitude'][:,:]
-                    lat = file.variables['latitude'][:,:]
-                    file = Dataset(var['direct']+"/"+var['date'][nf]+"_"+id0+"_chl_oc4me_"+id1+".nc")
-                    chl = file.variables['CHL_OC4ME'][:]
-                    #collate variables
-                    if 'chln' not in locals():
-                        lonn = np.empty(np.shape(lon))
-                        latn = np.empty(np.shape(lat))
-                        chln = np.empty(np.shape(chl))
-                        
-                    #check dimensions
-                    if np.shape(chl)[0]!=np.shape(chln)[0]:
-                        dif = np.abs(np.shape(chl)[0]-np.shape(chln)[0])
-                        lonn = np.dstack((lonn,lon[:-dif,:]))
-                        latn = np.dstack((latn,lat[:-dif,:]))
-                        chln = np.dstack((chln,chl[:-dif,:]))
-                    else:
-                        lonn = np.dstack((lonn,lon))
-                        latn = np.dstack((latn,lat))
-                        chln = np.dstack((chln,chl))
-                else:
-                    cprint('\tCould not find '+var['date'][nf]+' file to load !','red',attrs=['bold'])
-    #createnc and save
-        if 'chln' in locals():
-            chln = chln[:,:,1:]
-            lonn = lonn[:,:,1:]
-            latn = latn[:,:,1:]
-            fname = var['dir_wrk']+'/'+var['date'][nf]+'_'+var['prod']+'.nc'
-            Fields.Sentinel3_CHL(fname).createnc3Dll(lonn,latn,chln,'Sentinel-3 '+var['date'][nf]+' CHL')
-    return 
-
-def get_SEN3token(user,pwd):
-    URL = "https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token"
-
-    payload = {
-        'grant_type': 'password',
-        'client_id': 'cdse-public',
-        'username': user,
-        'password': pwd
-    }
-     
-    r = requests.post(URL,headers={"Content-Type":"application/x-www-form-urlencoded"},
-        data=payload)
-    token = r.json()['access_token']
-    return token
 
 #### Functions to save kml outputs
 def make_kml(llcrnrlon, llcrnrlat, urcrnrlon, urcrnrlat,

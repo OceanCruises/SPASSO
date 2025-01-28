@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Define satellite and diagnostic fields.
+    - Download satellite data from remote server.
+    - Functions to load and create netcdf files for each fields.
+    - Parameter for each fields are defined here (variable names and units, 
+                                                  colorbars).
+
 Created on Thu Jun  2 13:54:17 2022
 
 @author: lrousselet
@@ -19,6 +25,9 @@ import glob
 import copernicusmarine
 
 class Load():
+    """
+    Class to load satellite data from netcdf file created by SPASSO.
+    """
     def loadnc(self):
         file = Dataset(self.fname)
         self.lon = file.variables[self.lon_name][:]
@@ -66,6 +75,12 @@ class Load():
         return field
     
     def LoadLag(self,numdays,product,**kwargs):
+        """
+        Function to load velocity field from netcdf file for Lagrangian computation.
+        
+        Output: dictioonnary with all velocity fields loaded to compute Lagrangian
+        trajectories. Numdays is the number of daily velocity fields to load.
+        """
         RT=6371e3
         self.u_all = []
         self.v_all = []
@@ -106,6 +121,10 @@ class Load():
         return field 
 
 class Create():
+    """
+    Class to create a netcdf file with satellite data cropped on the 
+    domain defined in the config.ini file.
+    """
     def createnc(self,lon,lat,vvar,title,vu=None,vv=None,vvar2=None,vvar3=None):
         file = Dataset(self.fname,mode='w',format='NETCDF4_CLASSIC') 
         file.createDimension('lon', len(lon))

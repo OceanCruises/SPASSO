@@ -1,3 +1,7 @@
+"""
+Main code for SPASSO run. 
+Launch all SPASSO commands.
+"""
 import sys
 import GlobalVars, Diagnostics
 import Library
@@ -44,7 +48,7 @@ def spasso():
 ################################ DIAGNOSTICS
     Library.printMainMessage("Computing diagnostics")
 
-    ### Eulerian
+    ### Eulerian computation
     Library.tic()
     if GlobalVars.Eul['diag'] is not None:
         if outmode == 'clim':
@@ -52,7 +56,7 @@ def spasso():
         else:
             Diagnostics.Launch(cruise,'eulerian')
     Library.toc('Eulerian diagnostics')
-    ### Lagrangian
+    ### Lagrangian computation
     if GlobalVars.Lag['diag'] is not None:
         if outmode == 'clim':
             Diagnostics.Launch(cruise,'lagrangian',clim='on')   
@@ -87,9 +91,9 @@ if __name__ == '__main__':
         Library.usage()
         sys.exit(2)
 
-################# Initilisation et récupération of 'config.ini' file
+################# Initilization from 'config.ini' file
 
-    cruise = args[1] # recupere le config ini de la cruise
+    cruise = args[1] # get config.ini from defined cruise
     GlobalVars.configIni(cruise)
     Library.clean_wrk()
     GlobalVars.FigParam()
