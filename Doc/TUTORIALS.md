@@ -90,13 +90,13 @@ local@ubuntu: clear; python3 Spasso.py WMedSeaExample
     <img src="https://github.com/user-attachments/assets/c6e4a4b1-60cb-4b9f-a286-240e10ae8e22" width="200">
 
     - TIMEFROMBATHY: Time elapsed since last contact with bathymetry.
-> To run this diagnostic users must download the ETOPO file from [NOAA]{https://www.ngdc.noaa.gov/thredds/catalog/global/ETOPO2022/30s/30s_bed_elev_netcdf/catalog.html?dataset=globalDatasetScan/ETOPO2022/30s/30s_bed_elev_netcdf/ETOPO_2022_v1_30s_N90W180_bed.nc}.
-> The file should by stored in the BATHY/ folder. The name of the netcdf file should be defined in the config_WMedSeaExample.ini (L 140: bathyfile)
-
+    > To run this diagnostic users must download the ETOPO file from [NOAA](https://www.ngdc.noaa.gov/thredds/catalog/global/ETOPO2022/30s/30s_bed_elev_netcdf/catalog.html?dataset=globalDatasetScan/ETOPO2022/30s/30s_bed_elev_netcdf/ETOPO_2022_v1_30s_N90W180_bed.nc).
+    > The file should by stored in the BATHY/ folder. The name of the netcdf file should be defined in the config_WMedSeaExample.ini (L 140: bathyfile)\
+    
     <img src="https://github.com/user-attachments/assets/83395149-986b-4963-ab80-97fd022c8aaf" width="200"><img src="https://github.com/user-attachments/assets/917157a4-c979-4204-8b68-49819589184d" width="200"><img src="https://github.com/user-attachments/assets/cf56c798-b4bc-44eb-b11d-6567ec2367c9" width="200">
-
+    
     - SSTADV: Advection of SST field.
-
+      
     <img src="https://github.com/user-attachments/assets/4d761f29-10e4-4626-8482-65904e1bbd42" width="200">
 
 
