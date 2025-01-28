@@ -246,7 +246,7 @@ class Copernicus_PHY(Load,Create):
 
             if len(kwargs)==0 or 'cp' in kwargs:
                 # copying data in /Wrk
-                req_cp = "cp " + ff +' '+ var['dir_wrk'] + ddate[nf] + "_" + var['prod'] + '.nc'
+                req_cp = "cp '" + ff +"' '"+ var['dir_wrk'] + ddate[nf] + "_" + var['prod'] + ".nc'"
                 Library.execute_req(req_cp)
             
         return
@@ -291,7 +291,7 @@ class Copernicus_PHYTOT(Load,Create):
             
             # copying data in /Wrk
             if ff:
-                req_cp = "cp " + ff +' '+ var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + '.nc'
+                req_cp = "cp '" + ff +"' '"+ var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
                 Library.execute_req(req_cp)
             
         return
@@ -345,7 +345,7 @@ class Copernicus_PHYEURO(Load,Create):
             
             if len(kwargs)==0 or 'cp' in kwargs:
                 # copying data in /Wrk
-                req_cp = "cp " + ff +' '+ var['dir_wrk'] + ddate[nf] + "_" + var['prod'] + '.nc'
+                req_cp = "cp '" + ff +"' '"+ var['dir_wrk'] + ddate[nf] + "_" + var['prod'] + ".nc'"
                 Library.execute_req(req_cp)
         return
 
@@ -402,7 +402,7 @@ class Copernicus_PHY_WIND(Load,Create):
             
             if len(kwargs)==0 or 'cp' in kwargs:
                 # copying data in /Wrk
-                req_cp = "cp " + ff +' '+ var['dir_wrk'] + ddate[nf] + "_" + var['prod'] + '.nc'
+                req_cp = "cp '" + ff +"' '"+ var['dir_wrk'] + ddate[nf] + "_" + var['prod'] + ".nc'"
                 Library.execute_req(req_cp)
             
         return
@@ -436,7 +436,7 @@ class Copernicus_SST_L4(Load,Create):
             exf,ff = Library.ExistingFile(get_files,var['date'][nf])
             # copying data in /Wrk and rename
             if ff:
-                req_cp = "cp " + ff +' '+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + '.nc'
+                req_cp = "cp '" + ff +"' '"+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
                 Library.execute_req(req_cp)
             
         return
@@ -470,7 +470,7 @@ class Copernicus_SST_BAL_L4(Load,Create):
             exf,ff = Library.ExistingFile(get_files,var['date'][nf])
             # copying data in /Wrk and rename
             if ff:
-                req_cp = "cp " + ff +' '+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + '.nc'
+                req_cp = "cp '" + ff +"' '"+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
                 Library.execute_req(req_cp)
             
         return
@@ -507,7 +507,7 @@ class Copernicus_SSS_L4(Load,Create):
             exf,ff = Library.ExistingFile(get_files,var['date'][nf])
             # copying data in /Wrk and rename
             if ff:
-                req_cp = "cp " + ff +' '+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + '.nc'
+                req_cp = "cp '" + ff +"' '"+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
                 Library.execute_req(req_cp)
             
         return
@@ -541,7 +541,7 @@ class Copernicus_CHL_L3(Load,Create):
             exf,ff = Library.ExistingFile(get_files,var['date'][nf])
             # copying data in /Wrk
             if ff:
-                req_cp = "cp " + ff+' '+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + '.nc'
+                req_cp = "cp '" + ff+"' '"+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
                 Library.execute_req(req_cp)
             
         return
@@ -575,7 +575,7 @@ class Copernicus_CHL_L4(Load,Create):
             exf,ff = Library.ExistingFile(get_files,var['date'][nf])
             # copying data in /Wrk
             if ff:
-                req_cp = "cp " + ff +' '+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + '.nc'
+                req_cp = "cp '" + ff +"' '"+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
                 Library.execute_req(req_cp)
             
         return
@@ -610,7 +610,7 @@ class Copernicus_CHL_L4_DT(Load,Create):
 
             # copying data in /Wrk
             if ff:
-                req_cp = "cp " + ff+' '+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + '.nc'
+                req_cp = "cp '" + ff+"' '"+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
                 Library.execute_req(req_cp)
             
         return
@@ -644,7 +644,7 @@ class Copernicus_CHL_BAL(Load,Create):
             exf,ff = Library.ExistingFile(get_files,var['date'][nf])
             # copying data in /Wrk
             if ff:
-                req_cp = "cp " + ff+' '+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + '.nc'
+                req_cp = "cp '" + ff+"' '"+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
                 Library.execute_req(req_cp)
             
         return
@@ -682,7 +682,7 @@ class Copernicus_MEDSEA_WAVF(Load,Create):
             exf,ff = Library.ExistingFile(get_files,var['date'][nf])
             # copying data in /Wrk
             if ff:
-                req_cp = "cp " + ff + ' '+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + '.nc'
+                req_cp = "cp '" + ff +"' '"+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
                 Library.execute_req(req_cp)
             
         return
@@ -736,7 +736,7 @@ class CLS_PHY(Load,Create):
 
             # copying data in /Wrk
             if ff:
-                req_cp = "cp " + ff +' '+ var['dir_wrk']
+                req_cp = "cp '" + ff +"' '"+ var['dir_wrk']+"'"
                 Library.execute_req(req_cp)
             # copy global data in data folder
             req_wget = GlobalVars.Lib['motulib']+"motuclient -q -u "+var['user']+" -p "+var['pwd']+" -m https://motu-"+var['arc']+"datastore.cls.fr/motu-web/Motu -s "\
@@ -748,247 +748,7 @@ class CLS_PHY(Load,Create):
             Library.execute_req(req_wget)
             
         return
-
-class CLS_CHL(Load,Create):
-    def __init__(self,fname,**kwargs):
-        self.fname = fname
-        self.lon_name='longitude'
-        self.lat_name='latitude'
-        self.d3_name = 'time'
-        self.var_name = 'chl_a'
-        self.var_units = 'log10(mg/m3)'
-        self.cmap = 'YlGnBu_r'
-        self.log10 = True
-        self.colnorm = 'PowerNorm'
     
-    def download():
-        # setting global variables to local for a shorter req
-        data       = GlobalVars.config.get('products', 'chl_cls_data')
-        var        = Library.GetVars(data)
-
-        for nf in range(len(var['date'])):  
-            # dowloading data in /DATA
-            req_wget = GlobalVars.Lib['motulib']+"motuclient -q -u "+var['user']+" -p "+var['pwd']+" -m https://motu-"+var['arc']+"datastore.cls.fr/motu-web/Motu -s "\
-                +var['id']+" -d "+var['name']+" -x "+str(var['Lon'][0])+" -X "+str(var['Lon'][1])+" -y "+str(var['Lat'][0])+" -Y "+str(var['Lat'][1])\
-                    +" -t "+var['date'][nf]+" -T "+var['date'][nf]+ " --outputWritten netcdf -o "+var['direct']\
-                        +"/ -f "+var['datec'][nf]+"_"+var['prod']+".nc"
-                
-            Library.execute_req(req_wget)
-            exf,ff=Library.ExistingFile(var['direct']+"/"+var['datec'][nf]+"_"+var['prod']+".nc",var['date'][nf])
-
-            # copying data in /Wrk
-            if ff:
-                req_cp = "cp " + ff +' '+ var['dir_wrk']
-                Library.execute_req(req_cp)
-            
-        return
-    
-class CLS_CHL_5d(Load,Create):
-    def __init__(self,fname,**kwargs):
-        self.fname = fname
-        self.lon_name='longitude'
-        self.lat_name='latitude'
-        self.d3_name = 'time'
-        self.var_name = 'chl_a'
-        self.var_units = 'log10(mg/m3)'
-        self.cmap = 'YlGnBu_r'
-        self.log10 = True
-        self.colnorm = 'PowerNorm'
-    
-    def download():
-        # setting global variables to local for a shorter req
-        data       = GlobalVars.config.get('products', 'chl_cls5_data')
-        var        = Library.GetVars(data)
-
-        for nf in range(len(var['date'])):  
-            # dowloading data in /DATA
-            req_wget = GlobalVars.Lib['motulib']+"motuclient -q -u "+var['user']+" -p "+var['pwd']+" -m https://motu-"+var['arc']+"datastore.cls.fr/motu-web/Motu -s "\
-                +var['id']+" -d "+var['name']+" -x "+str(var['Lon'][0])+" -X "+str(var['Lon'][1])+" -y "+str(var['Lat'][0])+" -Y "+str(var['Lat'][1])\
-                    +" -t "+var['date'][nf]+" -T "+var['date'][nf]+ " --outputWritten netcdf -o "+var['direct']\
-                        +"/ -f "+var['datec'][nf]+"_"+var['prod']+".nc"
-                
-            Library.execute_req(req_wget)
-            exf,ff=Library.ExistingFile(var['direct']+"/"+var['datec'][nf]+"_"+var['prod']+".nc",var['date'][nf])
-
-            # copying data in /Wrk
-            if ff:
-                req_cp = "cp " + ff +' '+ var['dir_wrk']
-                Library.execute_req(req_cp)
-            
-        return
-
-class CLS_CHL_10d(Load,Create):
-    def __init__(self,fname,**kwargs):
-        self.fname = fname
-        self.lon_name='longitude'
-        self.lat_name='latitude'
-        self.d3_name = 'time'
-        self.var_name = 'chl_a'
-        self.var_units = 'log10(mg/m3)'
-        self.cmap = 'YlGnBu_r'
-        self.log10 = True
-        self.colnorm = 'PowerNorm'
-
-    def download():
-        # setting global variables to local for a shorter req
-        data       = GlobalVars.config.get('products', 'chl_cls10_data')
-        var        = Library.GetVars(data)
-
-        for nf in range(len(var['date'])):  
-            # dowloading data in /DATA
-            req_wget = GlobalVars.Lib['motulib']+"motuclient -q -u "+var['user']+" -p "+var['pwd']+" -m https://motu-"+var['arc']+"datastore.cls.fr/motu-web/Motu -s "\
-                +var['id']+" -d "+var['name']+" -x "+str(var['Lon'][0])+" -X "+str(var['Lon'][1])+" -y "+str(var['Lat'][0])+" -Y "+str(var['Lat'][1])\
-                    +" -t "+var['date'][nf]+" -T "+var['date'][nf]+ " --outputWritten netcdf -o "+var['direct']\
-                        +"/ -f "+var['datec'][nf]+"_"+var['prod']+".nc"
-                
-            Library.execute_req(req_wget)
-            exf,ff=Library.ExistingFile(var['direct']+"/"+"/"+var['datec'][nf]+"_"+var['prod']+".nc",var['date'][nf])
-
-            # copying data in /Wrk
-            if ff:
-                req_cp = "cp " + ff +' '+ var['dir_wrk']
-                Library.execute_req(req_cp)
-            
-        return
-
-class CLS_SST(Load,Create):
-    def __init__(self,fname,**kwargs):
-        self.fname = fname
-        self.lon_name='NbLongitudes'
-        self.lat_name='NbLatitudes'
-        self.d3_name = 'time'
-        self.var_name = 'Grid_0001'
-        self.var_units = 'degreesC'
-        self.cmap = cm_oc.cm.thermal
- 
-    def download():
-        # setting global variables to local for a shorter req
-        data       = GlobalVars.config.get('products', 'sst_cls_data')
-        var        = Library.GetVars(data)
-        
-        for nf in range(len(var['date'])):  
-            # dowloading data in /DATA
-            req_wget = GlobalVars.Lib['motulib']+"motuclient -q -u "+var['user']+" -p "+var['pwd']+" -m https://motu-"+var['arc']+"datastore.cls.fr/motu-web/Motu -s "\
-                +var['id']+" -d "+var['name']+" -x "+str(var['Lon'][0])+" -X "+str(var['Lon'][1])+" -y "+str(var['Lat'][0])+" -Y "+str(var['Lat'][1])\
-                    +" -t "+var['date'][nf]+" -T "+var['date'][nf]+ " --outputWritten netcdf -o "+var['direct']\
-                        +"/ -f "+var['datec'][nf]+"_"+var['prod']+".nc"
-                
-            Library.execute_req(req_wget)
-            exf,ff=Library.ExistingFile(var['direct']+"/"+var['datec'][nf]+"_"+var['prod']+".nc",var['date'][nf])
-
-            # copying data in /Wrk
-            if ff:
-                req_cp = "cp " + ff +' '+ var['dir_wrk']
-                Library.execute_req(req_cp)
-            
-        return
-        
-class CLS_SST_5d(Load,Create):
-    def __init__(self,fname,**kwargs):
-        self.fname = fname
-        self.lon_name='NbLongitudes'
-        self.lat_name='NbLatitudes'
-        self.d3_name = 'time'
-        self.var_name = 'Grid_0001'
-        self.var_units = 'degreesC'
-        self.cmap = cm_oc.cm.thermal
- 
-    def download():
-        # setting global variables to local for a shorter req
-        data       = GlobalVars.config.get('products', 'sst_cls5_data')
-        var        = Library.GetVars(data)
-        
-        for nf in range(len(var['date'])):  
-            # dowloading data in /DATA
-            req_wget = GlobalVars.Lib['motulib']+"motuclient -q -u "+var['user']+" -p "+var['pwd']+" -m https://motu-"+var['arc']+"datastore.cls.fr/motu-web/Motu -s "\
-                +var['id']+" -d "+var['name']+" -x "+str(var['Lon'][0])+" -X "+str(var['Lon'][1])+" -y "+str(var['Lat'][0])+" -Y "+str(var['Lat'][1])\
-                    +" -t "+var['date'][nf]+" -T "+var['date'][nf]+ " --outputWritten netcdf -o "+var['direct']\
-                        +"/ -f "+var['datec'][nf]+"_"+var['prod']+".nc"
-                
-            Library.execute_req(req_wget)
-            exf,ff=Library.ExistingFile(var['direct']+"/"+var['datec'][nf]+"_"+var['prod']+".nc",var['date'][nf])
-
-            # copying data in /Wrk
-            if ff:
-                req_cp = "cp " + ff +' '+ var['dir_wrk']
-                Library.execute_req(req_cp)
-            
-        return
-    
-class CLS_SST_7d(Load,Create):
-    def __init__(self,fname,**kwargs):
-        self.fname = fname
-        self.lon_name='NbLongitudes'
-        self.lat_name='NbLatitudes'
-        self.d3_name = 'time'
-        self.var_name = 'Grid_0001'
-        self.var_units = 'degreesC'
-        self.cmap = cm_oc.cm.thermal
-  
-    def download():
-        # setting global variables to local for a shorter req
-        data       = GlobalVars.config.get('products', 'sst_cls7_data')
-        var        = Library.GetVars(data)
-
-        for nf in range(len(var['date'])):  
-            # dowloading data in /DATA
-            req_wget = GlobalVars.Lib['motulib']+"motuclient -q -u "+var['user']+" -p "+var['pwd']+" -m https://motu-"+var['arc']+"datastore.cls.fr/motu-web/Motu -s "\
-                +var['id']+" -d "+var['name']+" -x "+str(var['Lon'][0])+" -X "+str(var['Lon'][1])+" -y "+str(var['Lat'][0])+" -Y "+str(var['Lat'][1])\
-                    +" -t "+var['date'][nf]+" -T "+var['date'][nf]+ " --outputWritten netcdf -o "+var['direct']\
-                        +"/ -f "+var['datec'][nf]+"_"+var['prod']+".nc"
-                
-            Library.execute_req(req_wget)
-            exf,ff=Library.ExistingFile(var['direct']+"/"+var['datec'][nf]+"_"+var['prod']+".nc",var['date'][nf])
-
-            # copying data in /Wrk
-            if ff:
-                req_cp = "cp " + ff +' '+ var['dir_wrk']
-                Library.execute_req(req_cp)
-            
-        return
-##################################################################
-## SENTINEL PRODUCT 
-##################################################################   
-class Sentinel3_CHL(Load,Create):
-    def __init__(self,fname,**kwargs):
-        self.fname = fname
-        self.lon_name='longitude'
-        self.lat_name='latitude'
-        self.d3_name = 'polygon'
-        self.var_name = 'CHL_OC4ME'
-        self.var_units = 'log10(mg/m3)'
-        self.cmap = 'YlGnBu_r'
-        self.log10 = True
-        self.colnorm = 'PowerNorm'
-  
-    def download():
-        # setting global variables to local for a shorter req
-        data       = GlobalVars.config.get('products', 'chl_sen3_data')
-        var        = Library.GetVars(data)
-
-        for nf in range(len(var['date'])):
-            for id0 in var['id0']:
-                for id1 in var['id1']:
-                    idp,name = Library.get_SEN3json(var['date'][nf],id0,id1)
-                    if idp!=None:
-                        # dowloading data in /DATA
-                        token = Library.get_SEN3token(var['user'],var['pwd'])
-                    
-                        req_wget = "wget -nv -a "+var['logf']+" --header 'Authorization: Bearer "+token+"' "\
-                        +"'https://catalogue.dataspace.copernicus.eu/odata/v1/Products("+idp\
-                            +")/Nodes("+name+")/Nodes(geo_coordinates.nc)/$value' "\
-                                +"-O "+var['direct']+"/"+var['date'][nf]+"_"+id0+"_geo_coordinates_"+id1+".nc --no-check-certificate"
-                        Library.execute_req(req_wget)
-                        req_wget = "wget -nv -a "+var['logf']+" --header 'Authorization: Bearer "+token+"' "\
-                        +"'https://catalogue.dataspace.copernicus.eu/odata/v1/Products("+idp\
-                            +")/Nodes("+name+")/Nodes(chl_oc4me.nc)/$value' "\
-                                +"-O "+var['direct']+"/"+var['date'][nf]+"_"+id0+"_chl_oc4me_"+id1+".nc --no-check-certificate"
-                        Library.execute_req(req_wget)            
-            
-            #Create unique netcdf file containing all polygons
-            Library.CreateSEN3(var)
-        return
-
 ##################################################################
 ## JAXA Himawari data
 ## https://www.eorc.jaxa.jp/ptree/
@@ -1022,7 +782,7 @@ class H8_SST_daily(Load,Create):
 
             # copying data in /Wrk
             if ff:
-                req_cp = "cp " + ff + ' '+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + '.nc'
+                req_cp = "cp '" + ff +"' '"+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
                 Library.execute_req(req_cp)
             
         return

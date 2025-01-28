@@ -133,7 +133,7 @@ def exit_program(error_value):
         Logfile(txt)
         #move log file into Logs/
         logf = "spassoLog"+GlobalVars.all_dates['today']+".txt"
-        req = "mv "+GlobalVars.Dir['dir_wrk']+"spassoLog.txt "\
+        req = "mv '"+GlobalVars.Dir['dir_wrk']+"spassoLog.txt' "\
             + GlobalVars.Dir['dir_logs']+logf
         os.system(req)
         sys.exit(0)
@@ -160,7 +160,7 @@ def ExistingFile(fname,date):
 
 
 def clean_wrk():
-    os.system("rm "+GlobalVars.Dir['dir_wrk']+"*.*")
+    os.system("rm '"+GlobalVars.Dir['dir_wrk']+"'*.*")
 
 def execute_req(req):
     Logfile("\tTrying to execute:\n")

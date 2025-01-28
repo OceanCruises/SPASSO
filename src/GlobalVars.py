@@ -157,7 +157,7 @@ def directories(cruise):
     global Param
 
     main_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))+'/'
-    cruise_path = main_path + "Cruises/" + cruise + "/" 
+    cruise_path = main_path + "Cruises/" + cruise + "/"
     
     Param = {
         'cruise' : cruise       
