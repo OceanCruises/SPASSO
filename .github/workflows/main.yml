@@ -15,9 +15,17 @@ jobs:
       with:
         python-version: '3.11'
         
-    - name: Install HDF5 and NetCDF4 dependencies
+    # ✅ Install dependencies needed for netCDF4 and HDF5
+    - name: Install system dependencies
       run: sudo apt-get update && sudo apt-get install -y libhdf5-dev hdf5-tools libnetcdf-dev netcdf-bin
-      
-    - run: pip install --upgrade pip setuptools wheel
-    - run: pip install -r requirements.txt
+    
+    # ✅ Install numpy separately to prevent netCDF4 build errors
+    - name: Install numpy first
+      run: pip install --upgrade pip setuptools wheel numpy
+
+    # ✅ Now install all other dependencies
+    - name: Install Python dependencies
+      run: pip install -r requirements.txt
+    
+    # ✅ Run the script
     - run: python ./src/Spasso.py WMedSeaExample
