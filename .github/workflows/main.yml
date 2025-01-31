@@ -13,5 +13,12 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
       with:
-        python-version: '3.11' 
-    - run: pip install -r requirements.txt; python ./src/Spasso.py WMedSeaExample
+        python-version: '3.11'
+        
+    # ✅ Install HDF5 dependencies (Fix for netCDF4)
+    - name: Install HDF5 dependencies
+      run: sudo apt-get update && sudo apt-get install -y libhdf5-dev hdf5-tools
+    
+    - run: pip install --upgrade pip setuptools wheel
+    - run: pip install -r requirements.txt
+    - run: python ./src/Spasso.py WMedSeaExample
