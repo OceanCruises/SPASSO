@@ -7,7 +7,7 @@ on:
 
 jobs:
   Run-npm-on-Ubuntu:
-    name: Run npm on Ubuntu
+    name: Run code on Ubuntu
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
