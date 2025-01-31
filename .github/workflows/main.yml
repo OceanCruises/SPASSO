@@ -15,10 +15,9 @@ jobs:
       with:
         python-version: '3.11'
         
-    # ✅ Install HDF5 dependencies (Fix for netCDF4)
-    - name: Install HDF5 dependencies
-      run: sudo apt-get update && sudo apt-get install -y libhdf5-dev hdf5-tools
-    
+    - name: Install HDF5 and NetCDF4 dependencies
+      run: sudo apt-get update && sudo apt-get install -y libhdf5-dev hdf5-tools libnetcdf-dev netcdf-bin
+      
     - run: pip install --upgrade pip setuptools wheel
     - run: pip install -r requirements.txt
     - run: python ./src/Spasso.py WMedSeaExample
