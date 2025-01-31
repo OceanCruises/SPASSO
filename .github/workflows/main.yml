@@ -2,8 +2,6 @@ name: Run code on Linux operating systems
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   Run-npm-on-Ubuntu:
@@ -15,18 +13,28 @@ jobs:
       with:
         python-version: '3.11'
         
-    # ✅ Install dependencies needed for netCDF4 and HDF5
     - name: Install system dependencies
       run: sudo apt-get update && sudo apt-get install -y libhdf5-dev hdf5-tools libnetcdf-dev netcdf-bin
     
-    # ✅ Install numpy separately to prevent netCDF4 build errors
     - name: Install numpy first
       run: pip install --upgrade pip setuptools wheel numpy
 
-    # ✅ Now install all other dependencies
     - name: Install Python dependencies
       run: pip install -r requirements.txt
-    
-    # ✅ Run the script
+
+    # 🔍 Show directory structure
+    - name: Show Directory Structure
+      run: pwd && ls -R
+
+    # 🔍 Ensure script is executable
+    - name: Ensure script is executable
+      run: chmod +x ./src/Spasso.py
+
+    # 🔍 Show Python path
+    - name: Debug PYTHONPATH
+      run: echo $PYTHONPATH
+
+    # ✅ Run with verbose debugging
     - name: Debug Execution
-      run: set -x && python ./src/Spasso.py WMedSeaExample
+      run: set -x && python -u ./src/Spasso.py WMedSeaExample
+
