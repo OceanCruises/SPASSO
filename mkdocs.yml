@@ -1,6 +1,6 @@
 site_name: SPASSO documentation
 theme:
-  name: material
+  name: mkdocs
 
 nav:
   - Home: README.md  # This makes README.md the homepage
