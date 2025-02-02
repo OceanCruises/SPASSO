@@ -1,8 +1,12 @@
-site_name: SPASSO documentation
+site_name: "SPASSO Documentation"
+site_url: "https://spasso.readthedocs.io/"
+repo_url: "https://github.com/OceanCruises/SPASSO"
+
 theme:
   name: mkdocs
 
 docs_dir: "."
+site_dir: "../site" 
 
 nav:
   - Home: README.md  # This makes README.md the homepage
