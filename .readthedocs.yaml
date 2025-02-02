@@ -1,31 +1,23 @@
 # Read the Docs configuration file
 # See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
 
-# Required
-version: 2
+version: 2  # Required
 
-# Set the OS, Python version, and other tools you might need
+# Define the build environment
 build:
-  os: ubuntu-24.04
+  os: "ubuntu-22.04"
   tools:
-    python: "3.10"
+    python: "3.10"  
 
-# Tell ReadTheDocs to use MkDocs instead of Sphinx
+# Use MkDocs instead of Sphinx
 mkdocs:
   configuration: mkdocs.yml
 
-# System packages (needed for building certain Python packages)
-system_packages:
-  - meson
-  - ninja-build
-
-# Install dependencies required to build documentation
+# Install required Python dependencies
 python:
   install:
-    - method: pip
-      path: .
     - requirements: requirements.txt
 
-# Set timeouts for large docs
+# Increase build timeout (optional, but useful for large docs)
 timeouts:
-  build: 1800
+  build: 1800  # 30 minutes max timeout
