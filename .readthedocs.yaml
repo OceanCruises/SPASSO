@@ -9,7 +9,6 @@ build:
   os: ubuntu-24.04
   tools:
     python: "3.10"
-    pip: "latest"
 
 # Tell ReadTheDocs to use MkDocs instead of Sphinx
 mkdocs:
