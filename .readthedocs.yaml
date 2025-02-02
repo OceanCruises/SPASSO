@@ -1,19 +1,13 @@
-# Read the Docs configuration file
-# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
-
 version: 2  # Required
 
-# Define the build environment
 build:
   os: "ubuntu-22.04"
   tools:
-    python: "3.10"  
+    python: "3.10"
 
-# Use MkDocs instead of Sphinx
 mkdocs:
-  configuration: mkdocs.yml
+  configuration: mkdocs.yml  # Ensure mkdocs.yml is present
 
-# Install required Python dependencies
 python:
   install:
     - requirements: requirements.txt
