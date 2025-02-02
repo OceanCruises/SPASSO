@@ -17,7 +17,3 @@ mkdocs:
 python:
   install:
     - requirements: requirements.txt
-
-# Increase build timeout (optional, but useful for large docs)
-timeouts:
-  build: 1800  # 30 minutes max timeout
