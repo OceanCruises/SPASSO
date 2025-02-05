@@ -36,5 +36,4 @@ jobs:
 
     # ✅ Run with verbose debugging
     - name: Debug Execution
-      run: set -x && python -X dev -u ./src/Spasso.py ./Cruises/WMedSeaExample
-
+      run: set -x && cd src && python -X dev -u Spasso.py WMedSeaExample
