@@ -2,6 +2,37 @@
 Main code for SPASSO run. 
 Launch all SPASSO commands.
 """
+
+import subprocess
+import sys
+
+def check_and_install_requirements(requirements_file="../requirements.txt"):
+    """Check if required packages are installed. If not, install them automatically."""
+    try:
+        with open(requirements_file, "r") as f:
+            packages = [line.strip() for line in f.readlines() if line.strip() and not line.startswith("#")]
+
+        missing_packages = []
+        for package in packages:
+            package_name = package.split("==")[0]  # Extract package name
+            try:
+                __import__(package_name)  # Try importing package
+            except ImportError:
+                missing_packages.append(package)
+
+        if missing_packages:
+            print(f"Installing missing packages: {', '.join(missing_packages)}")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", *missing_packages])
+        else:
+            print("All required packages are installed.")
+
+    except FileNotFoundError:
+        print(f"Error: `{requirements_file}` not found! Ensure the file exists.")
+
+
+# Run package check before executing the main script
+check_and_install_requirements()
+
 import sys
 import GlobalVars, Diagnostics
 import Library
@@ -64,6 +95,7 @@ def spasso():
             Diagnostics.Launch(cruise,'lagrangian')
     
     ############################### COPYING FIGURE AND SAVED
+    
     Library.printMainMessage("COPYING AND ZIPPING DATA")
     Library.cleantmp()
     Library.copyfiles()
@@ -87,11 +119,11 @@ if __name__ == '__main__':
 
     args = sys.argv
 
-    if (len(args) > 2):
+    if (len(args) != 2):
         Library.usage()
         sys.exit(2)
 
-################# Initilization from 'config.ini' file
+    ################# Initilization from 'config.ini' file
 
     cruise = args[1] # get config.ini from defined cruise
     GlobalVars.configIni(cruise)
@@ -102,10 +134,10 @@ if __name__ == '__main__':
     GlobalVars.BulletinParam()
     GlobalVars.LibrariesPaths()
     
-################# Get program starting time
+    ################# Get program starting time
     GlobalVars.init_date()
 
-################# lauching the program with: spasso()
+    ################# lauching the program with: spasso()
     if (spasso() == 0):
         Library.exit_program(0)
     else:
