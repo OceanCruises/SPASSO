@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import datetime
+import shutil
 
 def climatology(prod,date):
     Library.printMessage("Computing climatology for "+prod)
@@ -48,9 +49,15 @@ def climatology(prod,date):
     
     # remove daily nc file
     [os.remove(file) for file in fname]
-    #copy nc file in Processed
-    req = "cp "+ncfile+" "+GlobalVars.Dir['dir_proc']
-    Library.execute_req(req)
+    
+    # old #copy nc file in Processed
+    # req = "cp "+ncfile+" "+GlobalVars.Dir['dir_proc']
+    # Library.execute_req(req)
+    
+    ncfile_dest = os.path.join(GlobalVars.Dir['dir_proc'], os.path.basename(ncfile))
+    shutil.copy(ncfile, ncfile_dest)  # Works on both Windows & Linux
+    print(f"Copied {ncfile} to {ncfile_dest}")
+    
     return
 
 def SWOT_passing_time(crossover):
