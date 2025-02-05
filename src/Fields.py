@@ -23,6 +23,8 @@ import datetime
 import pandas as pd
 import glob
 import copernicusmarine
+import pathlib
+import shutil
 
 class Load():
     """
@@ -170,7 +172,7 @@ class Create():
             u[:,:,:] = vu
             v[:,:,:] = vv
             
-        file.close();
+        file.close()
         txt = self.fname + ' created.'
         Library.Logfile(txt)
 
@@ -191,74 +193,101 @@ class Create():
             var.units = self.var_units
             var[:,:,:] = vvar
             
-        file.close();
+        file.close()
         txt = self.fname + ' created.'
         Library.Logfile(txt)
 
 ##################################################################
 ## COPERNICUS DATA (CMEMS)
 ##################################################################
-class Copernicus_PHY(Load,Create): 
-    def __init__(self,fname,**kwargs):
+
+class Copernicus_PHY(Load, Create): 
+    def __init__(self, fname, **kwargs):
         self.fname = fname
-        data       = GlobalVars.config.get('products', 'phy_data')
-        var        = Library.GetVars(data)
-        self.data_dir   = var['direct']
-        self.lon_name='longitude'
-        self.lat_name='latitude'
+        data = GlobalVars.config.get('products', 'phy_data')
+        var = Library.GetVars(data)
+        self.data_dir = var['direct']
+        self.lon_name = 'longitude'
+        self.lat_name = 'latitude'
         self.d3_name = 'time'
         self.var_name = 'adt'
         self.var_units = 'm'
-        self.u_name='ugos'
-        self.v_name='vgos'
+        self.u_name = 'ugos'
+        self.v_name = 'vgos'
         self.u_units = 'm/s'
         self.v_units = 'm/s'
         self.cmap = cb.cbmap("cb.pregunta_r")
-        if 'dayv' in kwargs: 
-            self.date = datetime.datetime.strptime(kwargs['dayv'],"%Y-%m-%d")
-        else: 
-            self.date = datetime.datetime.strptime(var['date'][0],"%Y%m%d")
-    
-    def download(**kwargs):
-        # setting global variables to local for a shorter req
-        data       = GlobalVars.config.get('products', 'phy_data')
-        var        = Library.GetVars(data)
         
-        if ('date' in kwargs):
+        if 'dayv' in kwargs:
+            self.date = datetime.datetime.strptime(kwargs['dayv'], "%Y-%m-%d")
+        else:
+            self.date = datetime.datetime.strptime(var['date'][0], "%Y%m%d")
+
+    def download(**kwargs):
+        # Setting global variables to local for a shorter reference
+        data = GlobalVars.config.get('products', 'phy_data')
+        var = Library.GetVars(data)
+
+        if 'date' in kwargs:
             ddate = [kwargs['date']]
-            year = [datetime.datetime.strftime(datetime.datetime.strptime(ddate[0],'%Y%m%d'),'%Y')]
-            mo = [datetime.datetime.strftime(datetime.datetime.strptime(ddate[0],'%Y%m%d'),'%m')]
+            year = [datetime.datetime.strftime(datetime.datetime.strptime(ddate[0], "%Y%m%d"), "%Y")]
+            mo = [datetime.datetime.strftime(datetime.datetime.strptime(ddate[0], "%Y%m%d"), "%m")]
         else:
             ddate = var['date']
             year = var['year']
             mo = var['month']
-        
-        for nf in range(len(ddate)):
-            # dowloading data in /DATA
-            date_range = "*/" + year[nf] + "/" + mo[nf] + "/*_allsat_" + data + \
-                "_*_" + ddate[nf] + "_*.nc"
-            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
-                                             password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,no_directories='Y',overwrite='Y')
-            for file in query_metadata.files:
-                get_files = file.file_path
-            exf,ff = Library.ExistingFile(get_files,ddate[nf])
 
-            if len(kwargs)==0 or 'cp' in kwargs:
-                # copying data in /Wrk
-                req_cp = "cp '" + ff +"' '"+ var['dir_wrk'] + ddate[nf] + "_" + var['prod'] + ".nc'"
-                Library.execute_req(req_cp)
-            
+        for nf in range(len(ddate)):
+            # Downloading data in /DATA
+            date_range = f"*/{year[nf]}/{mo[nf]}/*_allsat_{data}_*_{ddate[nf]}_*.nc"
+
+            try:
+                query_metadata = copernicusmarine.get(
+                    dataset_id=var['id'],
+                    username=var['user'],
+                    password=var['pwd'],
+                    output_directory=var['direct'],
+                    filter=date_range,
+                    no_directories='Y',
+                    overwrite_output_data=True
+                )
+            except Exception as e:
+                print(f"❌ Error during download: {e}")
+                continue  # Skip this file if download fails
+
+            print(query_metadata)
+
+            # Extract file path safely
+            get_files = None
+            for file_path in query_metadata:
+                get_files = str(file_path)
+
+            if not get_files:
+                print(f"⚠️ No valid file paths found for {ddate[nf]}")
+                continue
+
+            exf, ff = Library.ExistingFile(get_files, ddate[nf])
+
+            if len(kwargs) == 0 or 'cp' in kwargs:
+                try:
+                    src_file = pathlib.Path(ff)
+                    dest_file = pathlib.Path(var['dir_wrk']) / f"{ddate[nf]}_{var['prod']}.nc"
+
+                    shutil.copy(src_file, dest_file)
+                    print(f"✅ Copied {src_file} to {dest_file}")
+                except Exception as e:
+                    print(f"❌ Error copying file: {e}")
+
         return
 
-class Copernicus_PHYTOT(Load,Create):
-    def __init__(self,fname,**kwargs):
+class Copernicus_PHYTOT(Load, Create):
+    def __init__(self, fname, **kwargs):
         self.fname = fname
         data = GlobalVars.config.get('products', 'phytot_data')
-        var        = Library.GetVars(data)
-        self.data_dir   = var['direct']
-        self.lon_name='longitude'
-        self.lat_name='latitude'
+        var = Library.GetVars(data)
+        self.data_dir = var['direct']
+        self.lon_name = 'longitude'
+        self.lat_name = 'latitude'
         self.d3_name = 'depth'
         self.var_name = ' '
         self.u_name = 'uo'
@@ -267,290 +296,508 @@ class Copernicus_PHYTOT(Load,Create):
         self.v_units = 'm/s'
         self.dimz = '0'
         self.cmap = cb.cbmap("cb.pregunta_r")
-        if 'dayv' in kwargs: 
-            self.date = datetime.datetime.strptime(kwargs['dayv'],"%Y-%m-%d")
-        else: 
-            self.date = datetime.datetime.strptime(var['date'][0],"%Y%m%d")
-    
-    def download():
-        # setting global variables to local for a shorter req
-        data       = GlobalVars.config.get('products', 'phytot_data')
-        var = Library.GetVars(data)
         
+        if 'dayv' in kwargs:
+            self.date = datetime.datetime.strptime(kwargs['dayv'], "%Y-%m-%d")
+        else:
+            self.date = datetime.datetime.strptime(var['date'][0], "%Y%m%d")
+
+    def download():
+        # Setting global variables to local for a shorter reference
+        data = GlobalVars.config.get('products', 'phytot_data')
+        var = Library.GetVars(data)
+
         for nf in range(len(var['date'])):
-            # dowloading data in /DATA
-            date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + \
-                "/dataset-uv-nrt-daily_" + var['date'][nf] + "*_*.nc"
-            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
-                                             password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,overwrite='Y')
-            
-            for file in query_metadata.files:
-                get_files = file.file_path
-            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
-            
-            # copying data in /Wrk
+            # Downloading data in /DATA
+            date_range = f"*/{var['year'][nf]}/{var['month'][nf]}/dataset-uv-nrt-daily_{var['date'][nf]}*_*.nc"
+
+            try:
+                query_metadata = copernicusmarine.get(
+                    dataset_id=var['id'],
+                    username=var['user'],
+                    password=var['pwd'],
+                    output_directory=var['direct'],
+                    filter=date_range,
+                    overwrite_output_data=True
+                )
+            except Exception as e:
+                print(f"❌ Error during download: {e}")
+                continue  # Skip this file if download fails
+
+            print(query_metadata)
+
+            # Extract file path safely
+            get_files = None
+            for file_path in query_metadata:
+                get_files = str(file_path)
+
+            if not get_files:
+                print(f"⚠️ No valid file paths found for {var['date'][nf]}")
+                continue
+
+            exf, ff = Library.ExistingFile(get_files, var['date'][nf])
+
+            # Copying data to /Wrk
             if ff:
-                req_cp = "cp '" + ff +"' '"+ var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
-                Library.execute_req(req_cp)
-            
+                try:
+                    src_file = pathlib.Path(ff)
+                    dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
+
+                    shutil.copy(src_file, dest_file)
+                    print(f"✅ Copied {src_file} to {dest_file}")
+                except Exception as e:
+                    print(f"❌ Error copying file: {e}")
+
         return
 
-class Copernicus_PHYEURO(Load,Create): 
-    def __init__(self,fname,**kwargs):
+class Copernicus_PHYEURO(Load, Create):
+    def __init__(self, fname, **kwargs):
         self.fname = fname
-        data       = GlobalVars.config.get('products', 'phyeuro_data')
-        var        = Library.GetVars(data)
-        self.data_dir   = var['direct']
-        self.lon_name='longitude'
-        self.lat_name='latitude'
+        data = GlobalVars.config.get('products', 'phyeuro_data')
+        var = Library.GetVars(data)
+        self.data_dir = var['direct']
+        self.lon_name = 'longitude'
+        self.lat_name = 'latitude'
         self.d3_name = 'time'
         self.var_name = 'adt'
         self.var_units = 'm'
-        self.u_name='ugos'
-        self.v_name='vgos'
+        self.u_name = 'ugos'
+        self.v_name = 'vgos'
         self.u_units = 'm/s'
         self.v_units = 'm/s'
         self.cmap = cb.cbmap("cb.pregunta_r")
-        if 'dayv' in kwargs: 
-            self.date = datetime.datetime.strptime(kwargs['dayv'],"%Y-%m-%d")
-        else: 
-            self.date = datetime.datetime.strptime(var['date'][0],"%Y%m%d")
-    
-    def download(**kwargs):
-        # setting global variables to local for a shorter req
-        data       = GlobalVars.config.get('products', 'phyeuro_data')
-        var        = Library.GetVars(data)
         
-        if ('date' in kwargs):
+        if 'dayv' in kwargs:
+            self.date = datetime.datetime.strptime(kwargs['dayv'], "%Y-%m-%d")
+        else:
+            self.date = datetime.datetime.strptime(var['date'][0], "%Y%m%d")
+
+    def download(**kwargs):
+        # Setting global variables to local for a shorter reference
+        data = GlobalVars.config.get('products', 'phyeuro_data')
+        var = Library.GetVars(data)
+
+        if 'date' in kwargs:
             ddate = [kwargs['date']]
-            year = [datetime.datetime.strftime(datetime.datetime.strptime(ddate[0],'%Y%m%d'),'%Y')]
-            mo = [datetime.datetime.strftime(datetime.datetime.strptime(ddate[0],'%Y%m%d'),'%m')]
+            year = [datetime.datetime.strftime(datetime.datetime.strptime(ddate[0], '%Y%m%d'), '%Y')]
+            mo = [datetime.datetime.strftime(datetime.datetime.strptime(ddate[0], '%Y%m%d'), '%m')]
         else:
             ddate = var['date']
             year = var['year']
             mo = var['month']
-        
-        for nf in range(len(ddate)):
-            # dowloading data in /DATA
-            date_range = "*/" + year[nf] + "/" + mo[nf] + "/nrt_europe_allsat"+ \
-            "_*_" + ddate[nf] + "_*.nc"
-            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
-                                             password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,overwrite='Y')
-            
-            for file in query_metadata.files:
-                get_files = file.file_path
-            exf,ff = Library.ExistingFile(get_files,ddate[nf])
-            
-            if len(kwargs)==0 or 'cp' in kwargs:
-                # copying data in /Wrk
-                req_cp = "cp '" + ff +"' '"+ var['dir_wrk'] + ddate[nf] + "_" + var['prod'] + ".nc'"
-                Library.execute_req(req_cp)
-        return
 
-class Copernicus_PHY_WIND(Load,Create): 
-    def __init__(self,fname,**kwargs):
+        for nf in range(len(ddate)):
+            # Constructing expected file path pattern
+            date_range = f"*/{year[nf]}/{mo[nf]}/nrt_europe_allsat_*_{ddate[nf]}_*.nc"
+
+            try:
+                query_metadata = copernicusmarine.get(
+                    dataset_id=var['id'],
+                    username=var['user'],
+                    password=var['pwd'],
+                    output_directory=var['direct'],
+                    filter=date_range,
+                    overwrite_output_data=True
+                )
+            except Exception as e:
+                print(f"❌ Error during download: {e}")
+                continue  # Skip this file if download fails
+
+            print(query_metadata)
+
+            # Extract file path safely
+            get_files = None
+            for file_path in query_metadata:
+                get_files = str(file_path)
+
+            if not get_files:
+                print(f"⚠️ No valid file paths found for {ddate[nf]}")
+                continue
+
+            exf, ff = Library.ExistingFile(get_files, ddate[nf])
+
+            # Copying data to /Wrk
+            if ff:
+                try:
+                    src_file = pathlib.Path(ff)
+                    dest_file = pathlib.Path(var['dir_wrk']) / f"{ddate[nf]}_{var['prod']}.nc"
+
+                    shutil.copy(src_file, dest_file)
+                    print(f"✅ Copied {src_file} to {dest_file}")
+                except Exception as e:
+                    print(f"❌ Error copying file: {e}")
+
+        return
+    
+class Copernicus_PHY_WIND(Load, Create):
+    def __init__(self, fname, **kwargs):
         self.fname = fname
-        data       = GlobalVars.config.get('products', 'phy_wind_data')
-        var        = Library.GetVars(data)
-        self.data_dir   = var['direct']
-        self.lon_name='lon'
-        self.lat_name='lat'
+        data = GlobalVars.config.get('products', 'phy_wind_data')
+        var = Library.GetVars(data)
+        self.data_dir = var['direct']
+        self.lon_name = 'lon'
+        self.lat_name = 'lat'
         self.d3_name = 'time'
         self.var_name = 'wind_curl'
         self.var_units = 's-1'
-        self.u_name='eastward_wind'
-        self.v_name='northward_wind'
+        self.u_name = 'eastward_wind'
+        self.v_name = 'northward_wind'
         self.u_units = 'm/s'
         self.v_units = 'm/s'
         self.cmap = plt.get_cmap('BrBG')
-    
+
     def download(**kwargs):
-        # setting global variables to local for a shorter req
-        data       = GlobalVars.config.get('products', 'phy_wind_data')
-        var        = Library.GetVars(data)
-        
-        if ('date' in kwargs):
+        # Setting global variables to local for a shorter reference
+        data = GlobalVars.config.get('products', 'phy_wind_data')
+        var = Library.GetVars(data)
+
+        if 'date' in kwargs:
             ddate = [kwargs['date']]
-            year = [datetime.datetime.strftime(datetime.datetime.strptime(ddate[0],'%Y%m%d'),'%Y')]
-            mo = [datetime.datetime.strftime(datetime.datetime.strptime(ddate[0],'%Y%m%d'),'%m')]
+            year = [datetime.datetime.strftime(datetime.datetime.strptime(ddate[0], '%Y%m%d'), '%Y')]
+            mo = [datetime.datetime.strftime(datetime.datetime.strptime(ddate[0], '%Y%m%d'), '%m')]
         else:
             ddate = var['date']
             year = [var['year']]
             mo = [var['month']]
-        
-        #closest hour
-        tmpdate = datetime.datetime.strptime(ddate,'%Y%m%d%H%M')
+
+        # Closest hour
+        tmpdate = datetime.datetime.strptime(ddate[0], '%Y%m%d%H%M')
         if tmpdate.minute >= 30:
-            tmpdate.replace(second=0, microsecond=0, minute=0, hour=tmpdate.hour+1)
+            tmpdate = tmpdate.replace(second=0, microsecond=0, minute=0, hour=tmpdate.hour + 1)
         else:
-            tmpdate.replace(second=0, microsecond=0, minute=0)
-        ddate = [datetime.datetime.strftime(tmpdate,'%Y%m%d%H')]
-        
+            tmpdate = tmpdate.replace(second=0, microsecond=0, minute=0)
+        ddate = [datetime.datetime.strftime(tmpdate, '%Y%m%d%H')]
+
         for nf in range(len(ddate)):
-            # dowloading data in /DATA
-            date_range = "*/" + year[nf] + "/" + mo[nf] +\
-                "/cmems_obs-wind_glo_phy_nrt_l4_0.125deg_PT1H_" + ddate[nf] + "_*.nc"
-            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
-                                             password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,overwrite='Y')
-            
-            for file in query_metadata.files:
-                get_files = file.file_path
-            exf,ff = Library.ExistingFile(get_files,ddate[nf])
-            
-            if len(kwargs)==0 or 'cp' in kwargs:
-                # copying data in /Wrk
-                req_cp = "cp '" + ff +"' '"+ var['dir_wrk'] + ddate[nf] + "_" + var['prod'] + ".nc'"
-                Library.execute_req(req_cp)
-            
+            # Constructing expected file path pattern
+            date_range = f"*/{year[nf]}/{mo[nf]}/cmems_obs-wind_glo_phy_nrt_l4_0.125deg_PT1H_{ddate[nf]}_*.nc"
+
+            try:
+                query_metadata = copernicusmarine.get(
+                    dataset_id=var['id'],
+                    username=var['user'],
+                    password=var['pwd'],
+                    output_directory=var['direct'],
+                    filter=date_range,
+                    overwrite_output_data=True
+                )
+            except Exception as e:
+                print(f"❌ Error during download: {e}")
+                continue  # Skip this file if download fails
+
+            print(query_metadata)
+
+            # Extract file path safely
+            get_files = None
+            for file_path in query_metadata:
+                get_files = str(file_path)
+
+            if not get_files:
+                print(f"⚠️ No valid file paths found for {ddate[nf]}")
+                continue
+
+            exf, ff = Library.ExistingFile(get_files, ddate[nf])
+
+            # Copying data to /Wrk
+            if ff:
+                try:
+                    src_file = pathlib.Path(ff)
+                    dest_file = pathlib.Path(var['dir_wrk']) / f"{ddate[nf]}_{var['prod']}.nc"
+
+                    shutil.copy(src_file, dest_file)
+                    print(f"✅ Copied {src_file} to {dest_file}")
+                except Exception as e:
+                    print(f"❌ Error copying file: {e}")
+
         return
     
-class Copernicus_SST_L4(Load,Create):
-    def __init__(self,fname,**kwargs):
+class Copernicus_SST_L4(Load, Create):
+    def __init__(self, fname, **kwargs):
         self.fname = fname
-        self.lon_name='lon'
-        self.lat_name='lat'
+        self.lon_name = 'lon'
+        self.lat_name = 'lat'
         self.d3_name = 'time'
         self.var_name = 'analysed_sst'
         self.var_units = 'Kelvin'
         self.K = True
         self.cmap = cb.cbmap("cb.iris_r")
-    
-    def download():       
-        # setting global variables to local for a shorter req
-        data       = GlobalVars.config.get('products', 'sst_l4_data')
-        var        = Library.GetVars(data)
-        
+
+    def download():
+        # Set global variables
+        data = GlobalVars.config.get('products', 'sst_l4_data')
+        var = Library.GetVars(data)
+
         for nf in range(len(var['date'])):
-            # dowloading data in /DATA
-            date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + "/" + var['date'][nf] + \
-                "120000-UKMO-L4_GHRSST-SSTfnd-OSTIA-GLOB-v02.0-fv02.0.nc"
-            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
-                                             password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,overwrite='Y')
-            
-            for file in query_metadata.files:
-                get_files = file.file_path
-            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
-            # copying data in /Wrk and rename
-            if ff:
-                req_cp = "cp '" + ff +"' '"+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
-                Library.execute_req(req_cp)
-            
+            # Construct expected filename pattern
+            date_range = f"*/{var['year'][nf]}/{var['month'][nf]}/{var['date'][nf]}120000-UKMO-L4_GHRSST-SSTfnd-OSTIA-GLOB-v02.0-fv02.0.nc"
+
+            # 🔹 Debugging: Print query before calling copernicusmarine.get()
+            print(f"Downloading dataset: {var['id']}, filtering with: {date_range}")
+
+            try:
+                # Try downloading the file
+                query_metadata = copernicusmarine.get(
+                    dataset_id=var['id'],
+                    username=var['user'],
+                    password=var['pwd'],
+                    output_directory=var['direct'],
+                    filter=date_range,
+                    overwrite_output_data=True
+                )
+            except Exception as e:
+                print(f"❌ Error during download: {e}")
+                continue  # Skip this file if download fails
+
+            # 🔹 Debugging: Ensure something is returned
+            if not query_metadata:
+                print(f"⚠️ No files found for {var['date'][nf]}")
+                continue
+
+            print(f"✅ Query returned: {query_metadata}")
+
+            # Extract file path safely
+            get_files = None
+            for file_path in query_metadata:  # No .files attribute needed
+                get_files = str(file_path)  # Convert to string
+
+            if not get_files:
+                print(f"⚠️ No valid file paths found for {var['date'][nf]}")
+                continue
+
+            exf, ff = Library.ExistingFile(get_files, var['date'][nf])
+
+            if not ff or not pathlib.Path(ff).exists():
+                print(f"⚠️ File does not exist: {ff}")
+                continue  # Skip this iteration
+
+            # 🔹 Copying file safely
+            try:
+                src_file = pathlib.Path(ff)
+                dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
+                shutil.copy(src_file, dest_file)
+                print(f"✅ Copied {src_file} to {dest_file}")
+            except Exception as e:
+                print(f"❌ Error copying file: {e}")
+
         return
 
-class Copernicus_SST_BAL_L4(Load,Create):
-    def __init__(self,fname,**kwargs):
+class Copernicus_SST_BAL_L4(Load, Create):
+    def __init__(self, fname, **kwargs):
         self.fname = fname
-        self.lon_name='lon'
-        self.lat_name='lat'
+        self.lon_name = 'lon'
+        self.lat_name = 'lat'
         self.d3_name = 'time'
         self.var_name = 'analysed_sst'
         self.var_units = 'Kelvin'
         self.K = True
         self.cmap = cb.cbmap("cb.iris_r")
-    
-    def download():       
-        # setting global variables to local for a shorter req
-        data       = GlobalVars.config.get('products', 'sst_ball4_data')
-        var        = Library.GetVars(data)
-        
+
+    def download():
+        # Setting global variables
+        data = GlobalVars.config.get('products', 'sst_ball4_data')
+        var = Library.GetVars(data)
+
         for nf in range(len(var['date'])):
-            # dowloading data in /DATA
-            date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + "/" + var['date'][nf] + \
-                "000000-DMI-L4_GHRSST-SSTfnd-DMI_OI-NSEABALTIC-v02.0-fv01.0.nc"
-            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
-                                             password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,overwrite='Y')
-            
-            for file in query_metadata.files:
-                get_files = file.file_path
-            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
-            # copying data in /Wrk and rename
-            if ff:
-                req_cp = "cp '" + ff +"' '"+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
-                Library.execute_req(req_cp)
-            
+            # Constructing filename pattern
+            date_range = f"*/{var['year'][nf]}/{var['month'][nf]}/{var['date'][nf]}000000-DMI-L4_GHRSST-SSTfnd-DMI_OI-NSEABALTIC-v02.0-fv01.0.nc"
+
+            # 🔹 Debugging: Print query before calling copernicusmarine.get()
+            print(f"Downloading dataset: {var['id']}, filtering with: {date_range}")
+
+            try:
+                # Try downloading the file
+                query_metadata = copernicusmarine.get(
+                    dataset_id=var['id'],
+                    username=var['user'],
+                    password=var['pwd'],
+                    output_directory=var['direct'],
+                    filter=date_range,
+                    overwrite_output_data=True
+                )
+            except Exception as e:
+                print(f"❌ Error during download: {e}")
+                continue  # Skip this file if download fails
+
+            # 🔹 Debugging: Ensure something is returned
+            if not query_metadata:
+                print(f"⚠️ No files found for {var['date'][nf]}")
+                continue
+
+            print(f"✅ Query returned: {query_metadata}")
+
+            # Extract file path safely
+            get_files = None
+            for file_path in query_metadata:  # No .files attribute needed
+                get_files = str(file_path)  # Convert to string
+
+            if not get_files:
+                print(f"⚠️ No valid file paths found for {var['date'][nf]}")
+                continue
+
+            exf, ff = Library.ExistingFile(get_files, var['date'][nf])
+
+            if not ff or not pathlib.Path(ff).exists():
+                print(f"⚠️ File does not exist: {ff}")
+                continue  # Skip this iteration
+
+            # 🔹 Copying file safely
+            try:
+                src_file = pathlib.Path(ff)
+                dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
+                shutil.copy(src_file, dest_file)
+                print(f"✅ Copied {src_file} to {dest_file}")
+            except Exception as e:
+                print(f"❌ Error copying file: {e}")
+
         return
     
-class Copernicus_SSS_L4(Load,Create):
-    def __init__(self,fname,**kwargs):
+class Copernicus_SSS_L4(Load, Create):
+    def __init__(self, fname, **kwargs):
         self.fname = fname
         data = GlobalVars.config.get('products', 'sss_l4_data')
-        var        = Library.GetVars(data)
-        self.data_dir   = var['direct']
-        self.lon_name='lon'
-        self.lat_name='lat'
+        var = Library.GetVars(data)
+        self.data_dir = var['direct']
+        self.lon_name = 'lon'
+        self.lat_name = 'lat'
         self.d3_name = 'time'
         self.var_name = 'sos'
         self.var_units = 'psu'
         self.cmap = cm_oc.cm.haline
-    
-    def download():       
-        # setting global variables to local for a shorter req
-        data       = GlobalVars.config.get('products', 'sss_l4_data')
-        var        = Library.GetVars(data)
-        
+
+    def download():
+        # Setting global variables
+        data = GlobalVars.config.get('products', 'sss_l4_data')
+        var = Library.GetVars(data)
+
         for nf in range(len(var['date'])):
-            #data available weekly / find closest available date
-            # dowloading data in /DATA
-            date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + "/" + \
-                "dataset-sss-ssd-nrt-daily_"+var['date'][nf]+"T*.nc"
-            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
-                                             password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,overwrite='Y')
-            
-            for file in query_metadata.files:
-                get_files = file.file_path
-            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
-            # copying data in /Wrk and rename
-            if ff:
-                req_cp = "cp '" + ff +"' '"+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
-                Library.execute_req(req_cp)
-            
+            # Constructing filename pattern
+            date_range = f"*/{var['year'][nf]}/{var['month'][nf]}/dataset-sss-ssd-nrt-daily_{var['date'][nf]}T*.nc"
+
+            # 🔹 Debugging: Print query before calling copernicusmarine.get()
+            print(f"Downloading dataset: {var['id']}, filtering with: {date_range}")
+
+            try:
+                # Try downloading the file
+                query_metadata = copernicusmarine.get(
+                    dataset_id=var['id'],
+                    username=var['user'],
+                    password=var['pwd'],
+                    output_directory=var['direct'],
+                    filter=date_range,
+                    overwrite_output_data=True
+                )
+            except Exception as e:
+                print(f"❌ Error during download: {e}")
+                continue  # Skip this file if download fails
+
+            # 🔹 Debugging: Ensure something is returned
+            if not query_metadata:
+                print(f"⚠️ No files found for {var['date'][nf]}")
+                continue
+
+            print(f"✅ Query returned: {query_metadata}")
+
+            # Extract file path safely
+            get_files = None
+            for file_path in query_metadata:  # No .files attribute needed
+                get_files = str(file_path)  # Convert to string
+
+            if not get_files:
+                print(f"⚠️ No valid file paths found for {var['date'][nf]}")
+                continue
+
+            exf, ff = Library.ExistingFile(get_files, var['date'][nf])
+
+            if not ff or not pathlib.Path(ff).exists():
+                print(f"⚠️ File does not exist: {ff}")
+                continue  # Skip this iteration
+
+            # 🔹 Copying file safely
+            try:
+                src_file = pathlib.Path(ff)
+                dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
+                shutil.copy(src_file, dest_file)
+                print(f"✅ Copied {src_file} to {dest_file}")
+            except Exception as e:
+                print(f"❌ Error copying file: {e}")
+
         return
     
-class Copernicus_CHL_L3(Load,Create):
-    def __init__(self,fname,**kwargs):
+class Copernicus_CHL_L3(Load, Create):
+    def __init__(self, fname, **kwargs):
         self.fname = fname
-        self.lon_name='lon'
-        self.lat_name='lat'
+        self.lon_name = 'lon'
+        self.lat_name = 'lat'
         self.d3_name = 'time'
         self.var_name = 'CHL'
         self.var_units = 'mg/m3'
         self.cmap = 'Greens'
         self.colnorm = 'PowerNorm'
-    
-    def download():
-        # setting global variables to local for a shorter req
-        data       = GlobalVars.config.get('products', 'chl_l3_data')
-        var        = Library.GetVars(data)
 
-        for nf in range(len(var['date'])):  
-            # dowloading data in /DATA
-            date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + "/" + var['date'][nf] + \
-                "_cmems_obs-oc_glo_bgc-plankton_nrt_l3-multi-4km_P1D.nc"
-            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
-                                             password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,overwrite='Y')
-            
-            for file in query_metadata.files:
-                get_files = file.file_path
-            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
-            # copying data in /Wrk
-            if ff:
-                req_cp = "cp '" + ff+"' '"+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
-                Library.execute_req(req_cp)
-            
+    def download():
+        # Setting global variables
+        data = GlobalVars.config.get('products', 'chl_l3_data')
+        var = Library.GetVars(data)
+
+        for nf in range(len(var['date'])):
+            # Constructing filename pattern
+            date_range = f"*/{var['year'][nf]}/{var['month'][nf]}/{var['date'][nf]}_cmems_obs-oc_glo_bgc-plankton_nrt_l3-multi-4km_P1D.nc"
+
+            # 🔹 Debugging: Print query before calling copernicusmarine.get()
+            print(f"Downloading dataset: {var['id']}, filtering with: {date_range}")
+
+            try:
+                # Try downloading the file
+                query_metadata = copernicusmarine.get(
+                    dataset_id=var['id'],
+                    username=var['user'],
+                    password=var['pwd'],
+                    output_directory=var['direct'],
+                    filter=date_range,
+                    overwrite_output_data=True
+                )
+            except Exception as e:
+                print(f"❌ Error during download: {e}")
+                continue  # Skip this file if download fails
+
+            # 🔹 Debugging: Ensure something is returned
+            if not query_metadata:
+                print(f"⚠️ No files found for {var['date'][nf]}")
+                continue
+
+            print(f"✅ Query returned: {query_metadata}")
+
+            # Extract file path safely
+            get_files = None
+            for file_path in query_metadata:  # No .files attribute needed
+                get_files = str(file_path)  # Convert to string
+
+            if not get_files:
+                print(f"⚠️ No valid file paths found for {var['date'][nf]}")
+                continue
+
+            exf, ff = Library.ExistingFile(get_files, var['date'][nf])
+
+            if not ff or not pathlib.Path(ff).exists():
+                print(f"⚠️ File does not exist: {ff}")
+                continue  # Skip this iteration
+
+            # 🔹 Copying file safely
+            try:
+                src_file = pathlib.Path(ff)
+                dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
+                shutil.copy(src_file, dest_file)
+                print(f"✅ Copied {src_file} to {dest_file}")
+            except Exception as e:
+                print(f"❌ Error copying file: {e}")
+
         return
     
-class Copernicus_CHL_L4(Load,Create):
-    def __init__(self,fname,**kwargs):
+class Copernicus_CHL_L4(Load, Create):
+    def __init__(self, fname, **kwargs):
         self.fname = fname
-        self.lon_name='lon'
-        self.lat_name='lat'
+        self.lon_name = 'lon'
+        self.lat_name = 'lat'
         self.d3_name = 'time'
         self.var_name = 'CHL'
         self.var_units = 'mg/m3'
@@ -558,28 +805,65 @@ class Copernicus_CHL_L4(Load,Create):
         self.colnorm = 'PowerNorm'
 
     def download():
-        # setting global variables to local for a shorter req
-        data       = GlobalVars.config.get('products', 'chl_l4_data')
-        var        = Library.GetVars(data)
+        # Setting global variables
+        data = GlobalVars.config.get('products', 'chl_l4_data')
+        var = Library.GetVars(data)
 
-        for nf in range(len(var['date'])):  
-            # dowloading data in /DATA
-            date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + "/" + var['date'][nf] + \
-                "_cmems_obs-oc_glo_bgc-plankton_nrt_l4-gapfree-multi-4km_P1D.nc"
-            query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
-                                             password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,overwrite='Y')
-            
-            for file in query_metadata.files:
-                get_files = file.file_path
-            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
-            # copying data in /Wrk
-            if ff:
-                req_cp = "cp '" + ff +"' '"+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
-                Library.execute_req(req_cp)
-            
+        for nf in range(len(var['date'])):
+            # Constructing filename pattern
+            date_range = f"*/{var['year'][nf]}/{var['month'][nf]}/{var['date'][nf]}_cmems_obs-oc_glo_bgc-plankton_nrt_l4-gapfree-multi-4km_P1D.nc"
+
+            # 🔹 Debugging: Print query before calling copernicusmarine.get()
+            print(f"Downloading dataset: {var['id']}, filtering with: {date_range}")
+
+            try:
+                # Try downloading the file
+                query_metadata = copernicusmarine.get(
+                    dataset_id=var['id'],
+                    username=var['user'],
+                    password=var['pwd'],
+                    output_directory=var['direct'],
+                    filter=date_range,
+                    overwrite_output_data=True
+                )
+            except Exception as e:
+                print(f"❌ Error during download: {e}")
+                continue  # Skip this file if download fails
+
+            # 🔹 Debugging: Ensure something is returned
+            if not query_metadata:
+                print(f"⚠️ No files found for {var['date'][nf]}")
+                continue
+
+            print(f"✅ Query returned: {query_metadata}")
+
+            # Extract file path safely
+            get_files = None
+            for file_path in query_metadata:  # No .files attribute needed
+                get_files = str(file_path)  # Convert to string
+
+            if not get_files:
+                print(f"⚠️ No valid file paths found for {var['date'][nf]}")
+                continue
+
+            exf, ff = Library.ExistingFile(get_files, var['date'][nf])
+
+            if not ff or not pathlib.Path(ff).exists():
+                print(f"⚠️ File does not exist: {ff}")
+                continue  # Skip this iteration
+
+            # 🔹 Copying file safely
+            try:
+                src_file = pathlib.Path(ff)
+                dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
+                shutil.copy(src_file, dest_file)
+                print(f"✅ Copied {src_file} to {dest_file}")
+            except Exception as e:
+                print(f"❌ Error copying file: {e}")
+
         return
-    
+
+# to change from there
 class Copernicus_CHL_L4_DT(Load,Create):
     def __init__(self,fname,**kwargs):
         self.fname = fname
@@ -601,9 +885,10 @@ class Copernicus_CHL_L4_DT(Load,Create):
             date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + "/" + var['date'][nf] + \
                 "_cmems_obs-oc_glo_bgc-plankton_myint_l4-gapfree-multi-4km_P1D.nc"
             query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
-                                             password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,overwrite='Y')
+                                                  password=var['pwd'],output_directory=var['direct'],
+                                                  filter=date_range,overwrite_output_data=True)
             
+            print(query_metadata)
             for file in query_metadata.files:
                 get_files = file.file_path
             exf,ff = Library.ExistingFile(get_files,var['date'][nf])
@@ -636,9 +921,10 @@ class Copernicus_CHL_BAL(Load,Create):
             date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + "/" + var['date'][nf] + \
                 "_cmems_obs-oc_bal_bgc-plankton_nrt_l3-olci-300m_P1D.nc"
             query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
-                                             password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,overwrite='Y')
+                                                  password=var['pwd'],output_directory=var['direct'],
+                                                  filter=date_range,overwrite_output_data=True)
             
+            print(query_metadata)
             for file in query_metadata.files:
                 get_files = file.file_path
             exf,ff = Library.ExistingFile(get_files,var['date'][nf])
@@ -674,9 +960,10 @@ class Copernicus_MEDSEA_WAVF(Load,Create):
             date_range = "*/" + var['year'][nf] + "/" + var['month'][nf] + "/" + var['date'][nf] + \
                 "12_h-HCMR--WAVE-MEDWAM4-MEDATL-*.nc"
             query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
-                                             password=var['pwd'],output_directory=var['direct'],
-                                             filter=date_range,overwrite='Y')
+                                                  password=var['pwd'],output_directory=var['direct'],
+                                                  filter=date_range,overwrite_output_data=True)
             
+            print(query_metadata)
             for file in query_metadata.files:
                 get_files = file.file_path
             exf,ff = Library.ExistingFile(get_files,var['date'][nf])
