@@ -20,6 +20,7 @@ import os
 from os.path import basename
 import glob
 import sys
+sys.stdout.reconfigure(encoding='utf-8')
 import datetime
 import time
 import smtplib
@@ -34,8 +35,13 @@ import requests
 from simplekml import (Kml, OverlayXY, ScreenXY, Units, RotationXY,
                        AltitudeMode, Camera)
 import matplotlib.pyplot as plt
+import shutil
+from pathlib import Path
 
 import GlobalVars,Fields
+
+def usage():
+    cprint("\t Should be called with two arguments, such as: python3 Spasso.py WMedSeaExample", 'red', attrs=['bold'])
 
 def Done(*args):
     if not args:
@@ -114,28 +120,41 @@ def welcome_message():
     Logfile(welcome_message)
 
 def exit_program(error_value):
-
+    """Handles SPASSO exit with appropriate messages and error codes."""
+    
     if error_value == 1:
-        cprint("\nProgram exit with errors.\n", 'red', attrs=['bold'])
+        cprint("\n Program exit with errors.\n", 'red', attrs=['bold'])
         sys.exit(1)
     elif error_value == 2:
-        cprint("\tCorrect data.", 'yellow', attrs=['bold'])
+        cprint("\t Correct data.", 'yellow', attrs=['bold'])
         sys.exit(2)
     else:
-        txt = "\n##########################################################\n\
-##\t\t\t\t\t\t\t\n\
-##\t Successfully end program on: \n\
-##\t "+get_current_date()+"\n\
-##\t Thanks for using SPASSO.\n\
-##\t\t\t\t\t\t\t\n\
-##########################################################\n"
+        txt = f"""
+##########################################################
+##                                                    
+##    Successfully ended program on: 
+##    {get_current_date()}
+##    Thanks for using SPASSO. 
+##                                                    
+##########################################################
+        """
         cprint(txt, 'blue', attrs=['bold'])
         Logfile(txt)
-        #move log file into Logs/
-        logf = "spassoLog"+GlobalVars.all_dates['today']+".txt"
-        req = "mv '"+GlobalVars.Dir['dir_wrk']+"spassoLog.txt' "\
-            + GlobalVars.Dir['dir_logs']+logf
-        os.system(req)
+
+        # Move log file into Logs/
+        log_filename = f"spassoLog{GlobalVars.all_dates['today']}.txt"
+        log_source = Path(GlobalVars.Dir['dir_wrk']) / "spassoLog.txt"
+        log_dest = Path(GlobalVars.Dir['dir_logs']) / log_filename
+
+        # Ensure Logs directory exists
+        log_dest.parent.mkdir(parents=True, exist_ok=True)
+
+        try:
+            shutil.move(log_source, log_dest)
+            print(f"Log file moved to: {log_dest}")
+        except Exception as e:
+            print(f"Error moving log file: {e}")
+
         sys.exit(0)
 
 def ExistingFile(fname,date):
@@ -158,9 +177,24 @@ def ExistingFile(fname,date):
 	
     return exf,ff
 
-
 def clean_wrk():
-    os.system("rm '"+GlobalVars.Dir['dir_wrk']+"'*.*")
+    wrk_dir = GlobalVars.Dir['dir_wrk']
+
+    # Check if directory exists
+    if os.path.exists(wrk_dir):
+        print(f"🧹 Cleaning work directory: {wrk_dir}")
+        # Remove all files in directory
+        for file in os.listdir(wrk_dir):
+            file_path = os.path.join(wrk_dir, file)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.remove(file_path)  # Remove file
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)  # Remove folder
+            except Exception as e:
+                print(f" Error deleting {file_path}: {e}")
+    else:
+        print(f"Work directory does not exist, nothing to clean: {wrk_dir}")
 
 def execute_req(req):
     Logfile("\tTrying to execute:\n")
@@ -289,32 +323,74 @@ def send_email(cruise):
     return
  
 def copyfiles():
+    """Copies relevant files to Figures and Processed directories and zips figures."""
     os.chdir(GlobalVars.Dir['dir_wrk'])
-    execute_req("cp *.png ../Figures")
-    Done('Copy in Figures/ done.')
-    if glob.glob(GlobalVars.Dir['dir_wrk']+'*.kmz'):
-        dirk = GlobalVars.Dir['dir_fig']+'kmz/'
-        isexists = os.path.exists(dirk)
-        if not isexists:
-            os.makedirs(dirk)
-        listf = glob.glob(GlobalVars.Dir['dir_wrk']+'Figures_oftheday_*.kmz')
-        for ff in listf:
-            req = "cp "+ff+" "+GlobalVars.Dir['dir_wrk']+"/"+GlobalVars.all_dates['today']+"_"+os.path.basename(ff)
-            execute_req(req)
-        execute_req("cp *.kmz "+dirk)
-        Done('Copy in Figures/kmz/ done.')
 
-    execute_req("cp *.nc ../Processed")
-    Done('Copy in Processed/ done.')
-    execute_req("tar -czf "+GlobalVars.all_dates['ref']+"_Figures.tar.gz *.png")
-    Done('Figures are zipped in '+GlobalVars.all_dates['ref']+'_Figures.tar.gz .')
-    return
+    # Copy PNG files to Figures directory
+    try:
+        figures_dir = Path("../Figures")
+        figures_dir.mkdir(exist_ok=True)
+        
+        for file in Path(GlobalVars.Dir['dir_wrk']).glob("*.png"):
+            print(file)
+            shutil.copy(file, figures_dir)
+        
+        Done("Copy to Figures/ done.")
+    except Exception as e:
+        print(f"Error copying PNG files: {e}")
+
+    # Handle KMZ files
+    try:
+        kmz_files = list(Path(GlobalVars.Dir['dir_wrk']).glob("*.kmz"))
+        if kmz_files:
+            kmz_dir = Path(GlobalVars.Dir['dir_fig']) / "kmz"
+            kmz_dir.mkdir(parents=True, exist_ok=True)
+
+            # Copy daily KMZ files
+            for file in Path(GlobalVars.Dir['dir_wrk']).glob("Figures_oftheday_*.kmz"):
+                dest_file = Path(GlobalVars.Dir['dir_wrk']) / f"{GlobalVars.all_dates['today']}_{file.name}"
+                shutil.copy(file, dest_file)
+
+            # Move all KMZ files to kmz directory
+            for file in kmz_files:
+                shutil.copy(file, kmz_dir)
+
+            Done("Copy to Figures/kmz/ done.")
+    except Exception as e:
+        print(f"Error handling KMZ files: {e}")
+
+    # Copy NetCDF files to Processed directory
+    try:
+        processed_dir = Path("../Processed")
+        processed_dir.mkdir(exist_ok=True)
+        
+        for file in Path(GlobalVars.Dir['dir_wrk']).glob("*.nc"):
+            shutil.copy(file, processed_dir)
+
+        Done("Copy to Processed/ done.")
+    except Exception as e:
+        print(f"Error copying NetCDF files: {e}")
+
+    # Zip all PNG files
+    try:
+        zip_filename = f"{GlobalVars.all_dates['ref']}_Figures.tar.gz"
+        shutil.make_archive(zip_filename.replace(".tar.gz", ""), "gztar", root_dir=GlobalVars.Dir['dir_wrk'], base_dir=".", verbose=True)
+        Done(f"Figures are zipped in {zip_filename}.")
+    except Exception as e:
+        print(f"Error zipping Figures: {e}")
 
 def cleantmp():
-        #delete tmp png files
-        figs = glob.glob(GlobalVars.Dir['dir_wrk']+'/*tmp*png')
+    """Deletes temporary PNG files in the working directory."""
+    
+    try:
+        figs = list(Path(GlobalVars.Dir['dir_wrk']).glob("*tmp*png"))
+        print(figs)
         for ff in figs:
-            os.remove(ff)
+            print(ff)
+            ff.unlink()
+        Done(f"Deleted {len(figs)} temporary PNG files.")
+    except Exception as e:
+        print(f"Error deleting temporary PNG files: {e}")
 
 #Homemade version of matlab tic and toc functions
 def tic():
