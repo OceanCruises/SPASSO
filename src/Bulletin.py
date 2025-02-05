@@ -14,11 +14,11 @@ Created on Wed Jan  4 09:42:19 2023
 @author: lrousselet
 """
 import GlobalVars, Library, Functions
-import glob, re, os
+import glob, re, os, shutil
 from tabulate import tabulate
 from pylatex import Document, Section, Subsection, Command, Center, Figure
 from pylatex.utils import NoEscape, bold
-
+from pathlib import Path
 
 def fill_document(doc):
     """Add a section, a subsection and some text to the document.
@@ -45,7 +45,7 @@ def fill_document(doc):
             
     with doc.create(Section('Daily figures analysis')):
         with doc.create(Subsection('Altimetry, derived currents')):
-            allfiles = glob.glob(GlobalVars.Dir['dir_wrk']+'/*PHY*.png')
+            allfiles = glob.glob(os.path.join(GlobalVars.Dir['dir_wrk'], '*PHY*.png'))
             files = list(filter(lambda x: not re.search('OW|KE|FTLE|LLADV|ADV|TIMEFROMBATHY', x),allfiles))
             files.sort(key=os.path.getmtime)
             diagfiles = list(set(allfiles)-set(files))
@@ -60,7 +60,7 @@ def fill_document(doc):
                 doc.append(Command(command='clearpage'))
         
         with doc.create(Subsection('SST analysis')):
-            alfiles = glob.glob(GlobalVars.Dir['dir_wrk']+'/*SST*.png')
+            alfiles = glob.glob(os.path.join(GlobalVars.Dir['dir_wrk'], '*SST*.png'))
             files = list(filter(lambda x: not re.search('ADV', x),alfiles))
             if not files:
                 doc.append('No figures done.')
@@ -72,7 +72,7 @@ def fill_document(doc):
                 doc.append(Command(command='clearpage'))
             
         with doc.create(Subsection('Chlorophyll analysis')):
-            files = glob.glob(GlobalVars.Dir['dir_wrk']+'/*CHL*.png')
+            files = glob.glob(os.path.join(GlobalVars.Dir['dir_wrk'], '*CHL*.png'))
             if not files:
                 doc.append('No figures done.')
             else:
@@ -101,7 +101,7 @@ def fill_document(doc):
                 doc.append(Command(command='clearpage'))
                         
         with doc.create(Subsection('Wave forecast analysis')):
-            files = glob.glob(GlobalVars.Dir['dir_wrk']+'/*WAVF*.png')
+            files = glob.glob(os.path.join(GlobalVars.Dir['dir_wrk'], '*WAVF*.png'))
             if not files:
                 doc.append('No figures done.')
             else:
@@ -114,12 +114,23 @@ def fill_document(doc):
     with doc.create(Center()):
         doc.append(bold('Acknowledgments'))
     if GlobalVars.Bull['acknow']:
-        with open(GlobalVars.Dir['cruise_path']+GlobalVars.Bull['acknow']) as f:
+        with open(os.path.join(GlobalVars.Dir['cruise_path'], GlobalVars.Bull['acknow'])) as f:
             contents = f.read()
         doc.append(contents)
     else:
         doc.append('Type here.')
 
+def find_latex_compiler():
+    """Try different LaTeX compilers and return the first available one."""
+
+    compilers = ["pdflatex", "latexmk", "xelatex", "lualatex"]
+    for compiler in compilers:
+        path = shutil.which(compiler)
+        if path:
+            print(f"Found LaTeX compiler: {compiler} ({path})")
+            return path
+    print("No LaTeX compiler found! Please install MiKTeX, TeXLive, or MacTeX.")
+    return None
 
 def create(cruise):
     # Document with `\maketitle` command activated
@@ -132,13 +143,29 @@ def create(cruise):
     doc.append(NoEscape(r'\maketitle'))
     fill_document(doc)
 
-    doc.generate_pdf(GlobalVars.Dir['dir_wrk']+cruise+'_bulletin'\
-                     +GlobalVars.all_dates['today'], clean_tex=False,\
-                         compiler=GlobalVars.Lib['latexcompiler'])
-#    tex = doc.dumps()  # The document as string in LaTeX syntax
-    
-    # screen print and copy
-    Library.Done(cruise+'_bulletin'+GlobalVars.all_dates['today']+'.pdf created.')
-    Library.Done(cruise+'_bulletin'+GlobalVars.all_dates['today']+'.tex created.')
-    Library.execute_req("cp *bulletin* ../Bulletin/")
-    Library.Done('Copy in Bulletin/ done.')
+    try:
+        pdf_filename = os.path.join(GlobalVars.Dir['dir_wrk'], f"{cruise}_bulletin{GlobalVars.all_dates['today']}")
+
+        # Automatically detect the best LaTeX compiler
+        latex_compiler = find_latex_compiler()
+        
+        if latex_compiler:
+            doc.generate_pdf(pdf_filename, clean_tex=False, compiler=latex_compiler)
+            print(f"PDF generated successfully: {pdf_filename}.pdf")
+        else:
+            print("Could not generate PDF: No LaTeX compiler found.")
+    except Exception as e:
+        print(f"Error generating PDF: {e}")
+
+    # Screen print and copy
+    Library.Done(f"{cruise}_bulletin{GlobalVars.all_dates['today']}.pdf created.")
+    Library.Done(f"{cruise}_bulletin{GlobalVars.all_dates['today']}.tex created.")
+
+    try:
+        src = Path(pdf_filename + ".pdf")
+        dest = Path("../Bulletin") / src.name
+        shutil.copy(src, dest)
+        print(f"Copied {src} to {dest}")
+        Library.Done('Copy in Bulletin/ done.')
+    except Exception as e:
+        print(f"Error copying file: {e}")
