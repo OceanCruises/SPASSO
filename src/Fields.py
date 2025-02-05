@@ -252,7 +252,7 @@ class Copernicus_PHY(Load, Create):
                     overwrite_output_data=True
                 )
             except Exception as e:
-                print(f"❌ Error during download: {e}")
+                print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
 
             print(query_metadata)
@@ -263,7 +263,7 @@ class Copernicus_PHY(Load, Create):
                 get_files = str(file_path)
 
             if not get_files:
-                print(f"⚠️ No valid file paths found for {ddate[nf]}")
+                print(f" No valid file paths found for {ddate[nf]}")
                 continue
 
             exf, ff = Library.ExistingFile(get_files, ddate[nf])
@@ -274,9 +274,9 @@ class Copernicus_PHY(Load, Create):
                     dest_file = pathlib.Path(var['dir_wrk']) / f"{ddate[nf]}_{var['prod']}.nc"
 
                     shutil.copy(src_file, dest_file)
-                    print(f"✅ Copied {src_file} to {dest_file}")
+                    print(f" Copied {src_file} to {dest_file}")
                 except Exception as e:
-                    print(f"❌ Error copying file: {e}")
+                    print(f" Error copying file: {e}")
 
         return
 
@@ -321,7 +321,7 @@ class Copernicus_PHYTOT(Load, Create):
                     overwrite_output_data=True
                 )
             except Exception as e:
-                print(f"❌ Error during download: {e}")
+                print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
 
             print(query_metadata)
@@ -332,7 +332,7 @@ class Copernicus_PHYTOT(Load, Create):
                 get_files = str(file_path)
 
             if not get_files:
-                print(f"⚠️ No valid file paths found for {var['date'][nf]}")
+                print(f" No valid file paths found for {var['date'][nf]}")
                 continue
 
             exf, ff = Library.ExistingFile(get_files, var['date'][nf])
@@ -344,9 +344,9 @@ class Copernicus_PHYTOT(Load, Create):
                     dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
 
                     shutil.copy(src_file, dest_file)
-                    print(f"✅ Copied {src_file} to {dest_file}")
+                    print(f" Copied {src_file} to {dest_file}")
                 except Exception as e:
-                    print(f"❌ Error copying file: {e}")
+                    print(f" Error copying file: {e}")
 
         return
 
@@ -400,7 +400,7 @@ class Copernicus_PHYEURO(Load, Create):
                     overwrite_output_data=True
                 )
             except Exception as e:
-                print(f"❌ Error during download: {e}")
+                print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
 
             print(query_metadata)
@@ -411,7 +411,7 @@ class Copernicus_PHYEURO(Load, Create):
                 get_files = str(file_path)
 
             if not get_files:
-                print(f"⚠️ No valid file paths found for {ddate[nf]}")
+                print(f" No valid file paths found for {ddate[nf]}")
                 continue
 
             exf, ff = Library.ExistingFile(get_files, ddate[nf])
@@ -423,9 +423,9 @@ class Copernicus_PHYEURO(Load, Create):
                     dest_file = pathlib.Path(var['dir_wrk']) / f"{ddate[nf]}_{var['prod']}.nc"
 
                     shutil.copy(src_file, dest_file)
-                    print(f"✅ Copied {src_file} to {dest_file}")
+                    print(f" Copied {src_file} to {dest_file}")
                 except Exception as e:
-                    print(f"❌ Error copying file: {e}")
+                    print(f" Error copying file: {e}")
 
         return
     
@@ -482,7 +482,7 @@ class Copernicus_PHY_WIND(Load, Create):
                     overwrite_output_data=True
                 )
             except Exception as e:
-                print(f"❌ Error during download: {e}")
+                print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
 
             print(query_metadata)
@@ -493,7 +493,7 @@ class Copernicus_PHY_WIND(Load, Create):
                 get_files = str(file_path)
 
             if not get_files:
-                print(f"⚠️ No valid file paths found for {ddate[nf]}")
+                print(f" No valid file paths found for {ddate[nf]}")
                 continue
 
             exf, ff = Library.ExistingFile(get_files, ddate[nf])
@@ -505,9 +505,9 @@ class Copernicus_PHY_WIND(Load, Create):
                     dest_file = pathlib.Path(var['dir_wrk']) / f"{ddate[nf]}_{var['prod']}.nc"
 
                     shutil.copy(src_file, dest_file)
-                    print(f"✅ Copied {src_file} to {dest_file}")
+                    print(f" Copied {src_file} to {dest_file}")
                 except Exception as e:
-                    print(f"❌ Error copying file: {e}")
+                    print(f" Error copying file: {e}")
 
         return
     
@@ -545,15 +545,15 @@ class Copernicus_SST_L4(Load, Create):
                     overwrite_output_data=True
                 )
             except Exception as e:
-                print(f"❌ Error during download: {e}")
+                print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
 
             # 🔹 Debugging: Ensure something is returned
             if not query_metadata:
-                print(f"⚠️ No files found for {var['date'][nf]}")
+                print(f" No files found for {var['date'][nf]}")
                 continue
 
-            print(f"✅ Query returned: {query_metadata}")
+            print(f" Query returned: {query_metadata}")
 
             # Extract file path safely
             get_files = None
@@ -561,13 +561,13 @@ class Copernicus_SST_L4(Load, Create):
                 get_files = str(file_path)  # Convert to string
 
             if not get_files:
-                print(f"⚠️ No valid file paths found for {var['date'][nf]}")
+                print(f" No valid file paths found for {var['date'][nf]}")
                 continue
 
             exf, ff = Library.ExistingFile(get_files, var['date'][nf])
 
             if not ff or not pathlib.Path(ff).exists():
-                print(f"⚠️ File does not exist: {ff}")
+                print(f" File does not exist: {ff}")
                 continue  # Skip this iteration
 
             # 🔹 Copying file safely
@@ -575,9 +575,9 @@ class Copernicus_SST_L4(Load, Create):
                 src_file = pathlib.Path(ff)
                 dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
                 shutil.copy(src_file, dest_file)
-                print(f"✅ Copied {src_file} to {dest_file}")
+                print(f" Copied {src_file} to {dest_file}")
             except Exception as e:
-                print(f"❌ Error copying file: {e}")
+                print(f" Error copying file: {e}")
 
         return
 
@@ -615,15 +615,15 @@ class Copernicus_SST_BAL_L4(Load, Create):
                     overwrite_output_data=True
                 )
             except Exception as e:
-                print(f"❌ Error during download: {e}")
+                print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
 
             # 🔹 Debugging: Ensure something is returned
             if not query_metadata:
-                print(f"⚠️ No files found for {var['date'][nf]}")
+                print(f" No files found for {var['date'][nf]}")
                 continue
 
-            print(f"✅ Query returned: {query_metadata}")
+            print(f" Query returned: {query_metadata}")
 
             # Extract file path safely
             get_files = None
@@ -631,13 +631,13 @@ class Copernicus_SST_BAL_L4(Load, Create):
                 get_files = str(file_path)  # Convert to string
 
             if not get_files:
-                print(f"⚠️ No valid file paths found for {var['date'][nf]}")
+                print(f" No valid file paths found for {var['date'][nf]}")
                 continue
 
             exf, ff = Library.ExistingFile(get_files, var['date'][nf])
 
             if not ff or not pathlib.Path(ff).exists():
-                print(f"⚠️ File does not exist: {ff}")
+                print(f" File does not exist: {ff}")
                 continue  # Skip this iteration
 
             # 🔹 Copying file safely
@@ -645,9 +645,9 @@ class Copernicus_SST_BAL_L4(Load, Create):
                 src_file = pathlib.Path(ff)
                 dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
                 shutil.copy(src_file, dest_file)
-                print(f"✅ Copied {src_file} to {dest_file}")
+                print(f" Copied {src_file} to {dest_file}")
             except Exception as e:
-                print(f"❌ Error copying file: {e}")
+                print(f" Error copying file: {e}")
 
         return
     
@@ -687,15 +687,15 @@ class Copernicus_SSS_L4(Load, Create):
                     overwrite_output_data=True
                 )
             except Exception as e:
-                print(f"❌ Error during download: {e}")
+                print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
 
             # 🔹 Debugging: Ensure something is returned
             if not query_metadata:
-                print(f"⚠️ No files found for {var['date'][nf]}")
+                print(f" No files found for {var['date'][nf]}")
                 continue
 
-            print(f"✅ Query returned: {query_metadata}")
+            print(f" Query returned: {query_metadata}")
 
             # Extract file path safely
             get_files = None
@@ -703,13 +703,13 @@ class Copernicus_SSS_L4(Load, Create):
                 get_files = str(file_path)  # Convert to string
 
             if not get_files:
-                print(f"⚠️ No valid file paths found for {var['date'][nf]}")
+                print(f" No valid file paths found for {var['date'][nf]}")
                 continue
 
             exf, ff = Library.ExistingFile(get_files, var['date'][nf])
 
             if not ff or not pathlib.Path(ff).exists():
-                print(f"⚠️ File does not exist: {ff}")
+                print(f" File does not exist: {ff}")
                 continue  # Skip this iteration
 
             # 🔹 Copying file safely
@@ -717,9 +717,9 @@ class Copernicus_SSS_L4(Load, Create):
                 src_file = pathlib.Path(ff)
                 dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
                 shutil.copy(src_file, dest_file)
-                print(f"✅ Copied {src_file} to {dest_file}")
+                print(f" Copied {src_file} to {dest_file}")
             except Exception as e:
-                print(f"❌ Error copying file: {e}")
+                print(f" Error copying file: {e}")
 
         return
     
@@ -757,15 +757,15 @@ class Copernicus_CHL_L3(Load, Create):
                     overwrite_output_data=True
                 )
             except Exception as e:
-                print(f"❌ Error during download: {e}")
+                print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
 
             # 🔹 Debugging: Ensure something is returned
             if not query_metadata:
-                print(f"⚠️ No files found for {var['date'][nf]}")
+                print(f" No files found for {var['date'][nf]}")
                 continue
 
-            print(f"✅ Query returned: {query_metadata}")
+            print(f" Query returned: {query_metadata}")
 
             # Extract file path safely
             get_files = None
@@ -773,13 +773,13 @@ class Copernicus_CHL_L3(Load, Create):
                 get_files = str(file_path)  # Convert to string
 
             if not get_files:
-                print(f"⚠️ No valid file paths found for {var['date'][nf]}")
+                print(f" No valid file paths found for {var['date'][nf]}")
                 continue
 
             exf, ff = Library.ExistingFile(get_files, var['date'][nf])
 
             if not ff or not pathlib.Path(ff).exists():
-                print(f"⚠️ File does not exist: {ff}")
+                print(f" File does not exist: {ff}")
                 continue  # Skip this iteration
 
             # 🔹 Copying file safely
@@ -787,9 +787,9 @@ class Copernicus_CHL_L3(Load, Create):
                 src_file = pathlib.Path(ff)
                 dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
                 shutil.copy(src_file, dest_file)
-                print(f"✅ Copied {src_file} to {dest_file}")
+                print(f" Copied {src_file} to {dest_file}")
             except Exception as e:
-                print(f"❌ Error copying file: {e}")
+                print(f" Error copying file: {e}")
 
         return
     
@@ -827,15 +827,15 @@ class Copernicus_CHL_L4(Load, Create):
                     overwrite_output_data=True
                 )
             except Exception as e:
-                print(f"❌ Error during download: {e}")
+                print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
 
             # 🔹 Debugging: Ensure something is returned
             if not query_metadata:
-                print(f"⚠️ No files found for {var['date'][nf]}")
+                print(f" No files found for {var['date'][nf]}")
                 continue
 
-            print(f"✅ Query returned: {query_metadata}")
+            print(f" Query returned: {query_metadata}")
 
             # Extract file path safely
             get_files = None
@@ -843,13 +843,13 @@ class Copernicus_CHL_L4(Load, Create):
                 get_files = str(file_path)  # Convert to string
 
             if not get_files:
-                print(f"⚠️ No valid file paths found for {var['date'][nf]}")
+                print(f" No valid file paths found for {var['date'][nf]}")
                 continue
 
             exf, ff = Library.ExistingFile(get_files, var['date'][nf])
 
             if not ff or not pathlib.Path(ff).exists():
-                print(f"⚠️ File does not exist: {ff}")
+                print(f" File does not exist: {ff}")
                 continue  # Skip this iteration
 
             # 🔹 Copying file safely
@@ -857,9 +857,9 @@ class Copernicus_CHL_L4(Load, Create):
                 src_file = pathlib.Path(ff)
                 dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
                 shutil.copy(src_file, dest_file)
-                print(f"✅ Copied {src_file} to {dest_file}")
+                print(f" Copied {src_file} to {dest_file}")
             except Exception as e:
-                print(f"❌ Error copying file: {e}")
+                print(f" Error copying file: {e}")
 
         return
 
