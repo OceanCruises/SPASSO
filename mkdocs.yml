@@ -5,11 +5,11 @@ repo_url: "https://github.com/OceanCruises/SPASSO"
 theme:
   name: mkdocs
 
-docs_dir: "."
-site_dir: "../site" 
+docs_dir: "docs"      # ✅ Store Markdown files here (not ".")
+site_dir: "site"      # ✅ Must be outside "docs"
 
 nav:
-  - Home: README.md  # This makes README.md the homepage
+  - Home: README.md  # Make sure README.md exists in "docs/"
 
 markdown_extensions:
   - toc:
