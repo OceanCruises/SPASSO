@@ -1,7 +1,7 @@
 name: Run code on Linux operating systems
 on:
   push:
-    branches: [ main ]
+    branches: [  ]
 
 jobs:
   Run-npm-on-Ubuntu:
