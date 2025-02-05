@@ -248,8 +248,8 @@ class Copernicus_PHY(Load, Create):
                     password=var['pwd'],
                     output_directory=var['direct'],
                     filter=date_range,
-                    no_directories='Y',
-                    overwrite_output_data=True
+                    no_directories=True,
+                    overwrite=True
                 )
             except Exception as e:
                 print(f" Error during download: {e}")
@@ -257,26 +257,21 @@ class Copernicus_PHY(Load, Create):
 
             print(query_metadata)
 
-            # Extract file path safely
-            get_files = None
-            for file_path in query_metadata:
-                get_files = str(file_path)
+            # Extract file paths
+            for file in query_metadata.files:
+                get_files = file.file_path
 
-            if not get_files:
-                print(f" No valid file paths found for {ddate[nf]}")
-                continue
+                # Check if the file exists
+                exf, ff = Library.ExistingFile(get_files, ddate[nf])
 
-            exf, ff = Library.ExistingFile(get_files, ddate[nf])
+            try:
+                src_file = pathlib.Path(ff)
+                dest_file = pathlib.Path(var['dir_wrk']) / f"{ddate[nf]}_{var['prod']}.nc"
 
-            if len(kwargs) == 0 or 'cp' in kwargs:
-                try:
-                    src_file = pathlib.Path(ff)
-                    dest_file = pathlib.Path(var['dir_wrk']) / f"{ddate[nf]}_{var['prod']}.nc"
-
-                    shutil.copy(src_file, dest_file)
-                    print(f" Copied {src_file} to {dest_file}")
-                except Exception as e:
-                    print(f" Error copying file: {e}")
+                shutil.copy(src_file, dest_file)
+                print(f" Copied {src_file} to {dest_file}")
+            except Exception as e:
+                print(f" Error copying file: {e}")
 
         return
 
