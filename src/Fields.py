@@ -255,8 +255,6 @@ class Copernicus_PHY(Load, Create):
                 print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
 
-            print(query_metadata)
-
             # Extract file paths
             for file in query_metadata.files:
                 get_files = file.file_path
@@ -313,13 +311,11 @@ class Copernicus_PHYTOT(Load, Create):
                     password=var['pwd'],
                     output_directory=var['direct'],
                     filter=date_range,
-                    overwrite_output_data=True
+                    overwrite=True
                 )
             except Exception as e:
                 print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
-
-            print(query_metadata)
 
             # Extract file path safely
             get_files = None
@@ -392,13 +388,11 @@ class Copernicus_PHYEURO(Load, Create):
                     password=var['pwd'],
                     output_directory=var['direct'],
                     filter=date_range,
-                    overwrite_output_data=True
+                    overwrite=True
                 )
             except Exception as e:
                 print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
-
-            print(query_metadata)
 
             # Extract file path safely
             get_files = None
@@ -474,35 +468,28 @@ class Copernicus_PHY_WIND(Load, Create):
                     password=var['pwd'],
                     output_directory=var['direct'],
                     filter=date_range,
-                    overwrite_output_data=True
+                    overwrite=True
                 )
             except Exception as e:
                 print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
 
-            print(query_metadata)
+            # Extract file paths
+            for file in query_metadata.files:
+                get_files = file.file_path
 
-            # Extract file path safely
-            get_files = None
-            for file_path in query_metadata:
-                get_files = str(file_path)
+                # Check if the file exists
+                exf, ff = Library.ExistingFile(get_files, ddate[nf])
 
-            if not get_files:
-                print(f" No valid file paths found for {ddate[nf]}")
-                continue
+            try:
+                src_file = pathlib.Path(ff)
+                dest_file = pathlib.Path(var['dir_wrk']) / f"{ddate[nf]}_{var['prod']}.nc"
 
-            exf, ff = Library.ExistingFile(get_files, ddate[nf])
+                shutil.copy(src_file, dest_file)
+                print(f" Copied {src_file} to {dest_file}")
+            except Exception as e:
+                print(f" Error copying file: {e}")
 
-            # Copying data to /Wrk
-            if ff:
-                try:
-                    src_file = pathlib.Path(ff)
-                    dest_file = pathlib.Path(var['dir_wrk']) / f"{ddate[nf]}_{var['prod']}.nc"
-
-                    shutil.copy(src_file, dest_file)
-                    print(f" Copied {src_file} to {dest_file}")
-                except Exception as e:
-                    print(f" Error copying file: {e}")
 
         return
     
@@ -526,9 +513,6 @@ class Copernicus_SST_L4(Load, Create):
             # Construct expected filename pattern
             date_range = f"*/{var['year'][nf]}/{var['month'][nf]}/{var['date'][nf]}120000-UKMO-L4_GHRSST-SSTfnd-OSTIA-GLOB-v02.0-fv02.0.nc"
 
-            # 🔹 Debugging: Print query before calling copernicusmarine.get()
-            print(f"Downloading dataset: {var['id']}, filtering with: {date_range}")
-
             try:
                 # Try downloading the file
                 query_metadata = copernicusmarine.get(
@@ -537,38 +521,23 @@ class Copernicus_SST_L4(Load, Create):
                     password=var['pwd'],
                     output_directory=var['direct'],
                     filter=date_range,
-                    overwrite_output_data=True
+                    overwrite=True
                 )
             except Exception as e:
                 print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
 
-            # 🔹 Debugging: Ensure something is returned
-            if not query_metadata:
-                print(f" No files found for {var['date'][nf]}")
-                continue
+            # Extract file paths
+            for file in query_metadata.files:
+                get_files = file.file_path
 
-            print(f" Query returned: {query_metadata}")
+                # Check if the file exists
+                exf, ff = Library.ExistingFile(get_files, var['date'][nf])
 
-            # Extract file path safely
-            get_files = None
-            for file_path in query_metadata:  # No .files attribute needed
-                get_files = str(file_path)  # Convert to string
-
-            if not get_files:
-                print(f" No valid file paths found for {var['date'][nf]}")
-                continue
-
-            exf, ff = Library.ExistingFile(get_files, var['date'][nf])
-
-            if not ff or not pathlib.Path(ff).exists():
-                print(f" File does not exist: {ff}")
-                continue  # Skip this iteration
-
-            # 🔹 Copying file safely
             try:
                 src_file = pathlib.Path(ff)
                 dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
+
                 shutil.copy(src_file, dest_file)
                 print(f" Copied {src_file} to {dest_file}")
             except Exception as e:
@@ -596,9 +565,6 @@ class Copernicus_SST_BAL_L4(Load, Create):
             # Constructing filename pattern
             date_range = f"*/{var['year'][nf]}/{var['month'][nf]}/{var['date'][nf]}000000-DMI-L4_GHRSST-SSTfnd-DMI_OI-NSEABALTIC-v02.0-fv01.0.nc"
 
-            # 🔹 Debugging: Print query before calling copernicusmarine.get()
-            print(f"Downloading dataset: {var['id']}, filtering with: {date_range}")
-
             try:
                 # Try downloading the file
                 query_metadata = copernicusmarine.get(
@@ -607,42 +573,28 @@ class Copernicus_SST_BAL_L4(Load, Create):
                     password=var['pwd'],
                     output_directory=var['direct'],
                     filter=date_range,
-                    overwrite_output_data=True
+                    overwrite=True
                 )
             except Exception as e:
                 print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
 
-            # 🔹 Debugging: Ensure something is returned
-            if not query_metadata:
-                print(f" No files found for {var['date'][nf]}")
-                continue
+            # Extract file paths
+            for file in query_metadata.files:
+                get_files = file.file_path
 
-            print(f" Query returned: {query_metadata}")
+                # Check if the file exists
+                exf, ff = Library.ExistingFile(get_files, var['date'][nf])
 
-            # Extract file path safely
-            get_files = None
-            for file_path in query_metadata:  # No .files attribute needed
-                get_files = str(file_path)  # Convert to string
-
-            if not get_files:
-                print(f" No valid file paths found for {var['date'][nf]}")
-                continue
-
-            exf, ff = Library.ExistingFile(get_files, var['date'][nf])
-
-            if not ff or not pathlib.Path(ff).exists():
-                print(f" File does not exist: {ff}")
-                continue  # Skip this iteration
-
-            # 🔹 Copying file safely
             try:
                 src_file = pathlib.Path(ff)
                 dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
+
                 shutil.copy(src_file, dest_file)
                 print(f" Copied {src_file} to {dest_file}")
             except Exception as e:
                 print(f" Error copying file: {e}")
+
 
         return
     
@@ -668,9 +620,6 @@ class Copernicus_SSS_L4(Load, Create):
             # Constructing filename pattern
             date_range = f"*/{var['year'][nf]}/{var['month'][nf]}/dataset-sss-ssd-nrt-daily_{var['date'][nf]}T*.nc"
 
-            # 🔹 Debugging: Print query before calling copernicusmarine.get()
-            print(f"Downloading dataset: {var['id']}, filtering with: {date_range}")
-
             try:
                 # Try downloading the file
                 query_metadata = copernicusmarine.get(
@@ -679,42 +628,28 @@ class Copernicus_SSS_L4(Load, Create):
                     password=var['pwd'],
                     output_directory=var['direct'],
                     filter=date_range,
-                    overwrite_output_data=True
+                    overwrite=True
                 )
             except Exception as e:
                 print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
 
-            # 🔹 Debugging: Ensure something is returned
-            if not query_metadata:
-                print(f" No files found for {var['date'][nf]}")
-                continue
+            # Extract file paths
+            for file in query_metadata.files:
+                get_files = file.file_path
 
-            print(f" Query returned: {query_metadata}")
+                # Check if the file exists
+                exf, ff = Library.ExistingFile(get_files, var['date'][nf])
 
-            # Extract file path safely
-            get_files = None
-            for file_path in query_metadata:  # No .files attribute needed
-                get_files = str(file_path)  # Convert to string
-
-            if not get_files:
-                print(f" No valid file paths found for {var['date'][nf]}")
-                continue
-
-            exf, ff = Library.ExistingFile(get_files, var['date'][nf])
-
-            if not ff or not pathlib.Path(ff).exists():
-                print(f" File does not exist: {ff}")
-                continue  # Skip this iteration
-
-            # 🔹 Copying file safely
             try:
                 src_file = pathlib.Path(ff)
                 dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
+
                 shutil.copy(src_file, dest_file)
                 print(f" Copied {src_file} to {dest_file}")
             except Exception as e:
                 print(f" Error copying file: {e}")
+
 
         return
     
@@ -738,9 +673,6 @@ class Copernicus_CHL_L3(Load, Create):
             # Constructing filename pattern
             date_range = f"*/{var['year'][nf]}/{var['month'][nf]}/{var['date'][nf]}_cmems_obs-oc_glo_bgc-plankton_nrt_l3-multi-4km_P1D.nc"
 
-            # 🔹 Debugging: Print query before calling copernicusmarine.get()
-            print(f"Downloading dataset: {var['id']}, filtering with: {date_range}")
-
             try:
                 # Try downloading the file
                 query_metadata = copernicusmarine.get(
@@ -749,38 +681,23 @@ class Copernicus_CHL_L3(Load, Create):
                     password=var['pwd'],
                     output_directory=var['direct'],
                     filter=date_range,
-                    overwrite_output_data=True
+                    overwrite=True
                 )
             except Exception as e:
                 print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
 
-            # 🔹 Debugging: Ensure something is returned
-            if not query_metadata:
-                print(f" No files found for {var['date'][nf]}")
-                continue
+            # Extract file paths
+            for file in query_metadata.files:
+                get_files = file.file_path
 
-            print(f" Query returned: {query_metadata}")
+                # Check if the file exists
+                exf, ff = Library.ExistingFile(get_files, var['date'][nf])
 
-            # Extract file path safely
-            get_files = None
-            for file_path in query_metadata:  # No .files attribute needed
-                get_files = str(file_path)  # Convert to string
-
-            if not get_files:
-                print(f" No valid file paths found for {var['date'][nf]}")
-                continue
-
-            exf, ff = Library.ExistingFile(get_files, var['date'][nf])
-
-            if not ff or not pathlib.Path(ff).exists():
-                print(f" File does not exist: {ff}")
-                continue  # Skip this iteration
-
-            # 🔹 Copying file safely
             try:
                 src_file = pathlib.Path(ff)
                 dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
+
                 shutil.copy(src_file, dest_file)
                 print(f" Copied {src_file} to {dest_file}")
             except Exception as e:
@@ -808,9 +725,6 @@ class Copernicus_CHL_L4(Load, Create):
             # Constructing filename pattern
             date_range = f"*/{var['year'][nf]}/{var['month'][nf]}/{var['date'][nf]}_cmems_obs-oc_glo_bgc-plankton_nrt_l4-gapfree-multi-4km_P1D.nc"
 
-            # 🔹 Debugging: Print query before calling copernicusmarine.get()
-            print(f"Downloading dataset: {var['id']}, filtering with: {date_range}")
-
             try:
                 # Try downloading the file
                 query_metadata = copernicusmarine.get(
@@ -819,38 +733,23 @@ class Copernicus_CHL_L4(Load, Create):
                     password=var['pwd'],
                     output_directory=var['direct'],
                     filter=date_range,
-                    overwrite_output_data=True
+                    overwrite=True
                 )
             except Exception as e:
                 print(f" Error during download: {e}")
                 continue  # Skip this file if download fails
+                
+            # Extract file paths
+            for file in query_metadata.files:
+                get_files = file.file_path
 
-            # 🔹 Debugging: Ensure something is returned
-            if not query_metadata:
-                print(f" No files found for {var['date'][nf]}")
-                continue
+                # Check if the file exists
+                exf, ff = Library.ExistingFile(get_files, var['date'][nf])
 
-            print(f" Query returned: {query_metadata}")
-
-            # Extract file path safely
-            get_files = None
-            for file_path in query_metadata:  # No .files attribute needed
-                get_files = str(file_path)  # Convert to string
-
-            if not get_files:
-                print(f" No valid file paths found for {var['date'][nf]}")
-                continue
-
-            exf, ff = Library.ExistingFile(get_files, var['date'][nf])
-
-            if not ff or not pathlib.Path(ff).exists():
-                print(f" File does not exist: {ff}")
-                continue  # Skip this iteration
-
-            # 🔹 Copying file safely
             try:
                 src_file = pathlib.Path(ff)
                 dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
+
                 shutil.copy(src_file, dest_file)
                 print(f" Copied {src_file} to {dest_file}")
             except Exception as e:
@@ -881,17 +780,23 @@ class Copernicus_CHL_L4_DT(Load,Create):
                 "_cmems_obs-oc_glo_bgc-plankton_myint_l4-gapfree-multi-4km_P1D.nc"
             query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
                                                   password=var['pwd'],output_directory=var['direct'],
-                                                  filter=date_range,overwrite_output_data=True)
+                                                  filter=date_range,overwrite=True)
             
-            print(query_metadata)
+            # Extract file paths
             for file in query_metadata.files:
                 get_files = file.file_path
-            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
 
-            # copying data in /Wrk
-            if ff:
-                req_cp = "cp '" + ff+"' '"+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
-                Library.execute_req(req_cp)
+                # Check if the file exists
+                exf, ff = Library.ExistingFile(get_files, var['date'][nf])
+
+            try:
+                src_file = pathlib.Path(ff)
+                dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
+
+                shutil.copy(src_file, dest_file)
+                print(f" Copied {src_file} to {dest_file}")
+            except Exception as e:
+                print(f" Error copying file: {e}")
             
         return
 
@@ -917,17 +822,24 @@ class Copernicus_CHL_BAL(Load,Create):
                 "_cmems_obs-oc_bal_bgc-plankton_nrt_l3-olci-300m_P1D.nc"
             query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
                                                   password=var['pwd'],output_directory=var['direct'],
-                                                  filter=date_range,overwrite_output_data=True)
+                                                  filter=date_range,overwrite=True)
             
-            print(query_metadata)
+            # Extract file paths
             for file in query_metadata.files:
                 get_files = file.file_path
-            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
-            # copying data in /Wrk
-            if ff:
-                req_cp = "cp '" + ff+"' '"+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
-                Library.execute_req(req_cp)
-            
+
+                # Check if the file exists
+                exf, ff = Library.ExistingFile(get_files, var['date'][nf])
+
+            try:
+                src_file = pathlib.Path(ff)
+                dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
+
+                shutil.copy(src_file, dest_file)
+                print(f" Copied {src_file} to {dest_file}")
+            except Exception as e:
+                print(f" Error copying file: {e}")
+
         return
     
 class Copernicus_MEDSEA_WAVF(Load,Create):
@@ -956,17 +868,24 @@ class Copernicus_MEDSEA_WAVF(Load,Create):
                 "12_h-HCMR--WAVE-MEDWAM4-MEDATL-*.nc"
             query_metadata = copernicusmarine.get(dataset_id=var['id'],username=var['user'],
                                                   password=var['pwd'],output_directory=var['direct'],
-                                                  filter=date_range,overwrite_output_data=True)
+                                                  filter=date_range,overwrite=True)
             
-            print(query_metadata)
+            # Extract file paths
             for file in query_metadata.files:
                 get_files = file.file_path
-            exf,ff = Library.ExistingFile(get_files,var['date'][nf])
-            # copying data in /Wrk
-            if ff:
-                req_cp = "cp '" + ff +"' '"+var['dir_wrk'] + var['date'][nf] + "_" + var['prod'] + ".nc'"
-                Library.execute_req(req_cp)
-            
+
+                # Check if the file exists
+                exf, ff = Library.ExistingFile(get_files, var['date'][nf])
+
+            try:
+                src_file = pathlib.Path(ff)
+                dest_file = pathlib.Path(var['dir_wrk']) / f"{var['date'][nf]}_{var['prod']}.nc"
+
+                shutil.copy(src_file, dest_file)
+                print(f" Copied {src_file} to {dest_file}")
+            except Exception as e:
+                print(f" Error copying file: {e}")
+     
         return
 
 ##################################################################
