@@ -1,39 +1,100 @@
-name: Run code on Linux operating systems
+name: Run code on multiple OS (Linux, macOS, Windows)
+
 on:
   push:
     branches: [ main ]
 
 jobs:
-  Run-npm-on-Ubuntu:
+  Run-on-Ubuntu:
     name: Run code on Ubuntu
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        
-    - name: Install system dependencies
-      run: sudo apt-get update && sudo apt-get install -y libhdf5-dev hdf5-tools libnetcdf-dev netcdf-bin
-    
-    - name: Install numpy first
-      run: pip install --upgrade pip setuptools wheel numpy
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-    - name: Install Python dependencies
-      run: pip install -r requirements.txt
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libhdf5-dev hdf5-tools libnetcdf-dev netcdf-bin
 
-    # 🔍 Show directory structure
-    - name: Show Directory Structure
-      run: pwd && ls -R
+      - name: Install numpy first
+        run: pip install --upgrade pip setuptools wheel numpy
 
-    # 🔍 Ensure script is executable
-    - name: Ensure script is executable
-      run: chmod +x ./src/Spasso.py
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
 
-    # 🔍 Show Python path
-    - name: Debug PYTHONPATH
-      run: echo $PYTHONPATH
+      # 🔍 Show directory structure
+      - name: Show Directory Structure
+        run: pwd && ls -R
 
-    # ✅ Run with verbose debugging
-    - name: Debug Execution
-      run: set -x && cd src && python -X dev -u Spasso.py WMedSeaExample
+      # 🔍 Ensure script is executable
+      - name: Ensure script is executable
+        run: chmod +x ./src/Spasso.py
+
+      # 🔍 Show Python path
+      - name: Debug PYTHONPATH
+        run: echo $PYTHONPATH
+
+      # ✅ Run with verbose debugging
+      - name: Debug Execution
+        run: set -x && cd src && python -X dev -u Spasso.py WMedSeaExample
+
+  Run-on-macOS:
+    name: Run code on macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install system dependencies
+        run: brew install hdf5 netcdf
+
+      - name: Install numpy first
+        run: pip install --upgrade pip setuptools wheel numpy
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      # 🔍 Show directory structure
+      - name: Show Directory Structure
+        run: pwd && ls -R
+
+      # 🔍 Show Python path
+      - name: Debug PYTHONPATH
+        run: echo $PYTHONPATH
+
+      # ✅ Run with verbose debugging
+      - name: Debug Execution
+        run: set -x && cd src && python -X dev -u Spasso.py WMedSeaExample
+
+  Run-on-Windows:
+    name: Run code on Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install numpy first
+        run: pip install --upgrade pip setuptools wheel numpy
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      # 🔍 Show directory structure
+      - name: Show Directory Structure
+        run: pwd && ls -R
+
+      # 🔍 Show Python path
+      - name: Debug PYTHONPATH
+        run: echo $PYTHONPATH
+
+      # ✅ Run with verbose debugging
+      - name: Debug Execution
+        shell: bash
+        run: |
+          cd src
+          python -X dev -u Spasso.py WMedSeaExample
