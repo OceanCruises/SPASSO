@@ -50,25 +50,28 @@ jobs:
           channels: conda-forge
           activate-environment: test-env
 
-      - name: Remove existing Conda environment (if any)
+      - name: Fully Reset Conda Environment
         shell: bash -l {0}
         run: |
-          conda env remove --name test-env --yes || echo "No existing environment"
+          conda deactivate || echo "No active env"
+          conda remove --name test-env --all --yes || echo "Env does not exist"
 
-      - name: Create Conda environment
+      - name: Create or Update Conda Environment
         shell: bash -l {0}
         run: |
-          conda env create -f environment.yml
+          conda env create -f environment.yml || conda env update --file environment.yml --prune
 
       - name: Activate Conda environment
         shell: bash -l {0}
         run: |
+          source $(conda info --base)/etc/profile.d/conda.sh
           conda activate test-env
           conda info --envs  # Debugging
 
       - name: Run script
         shell: bash -l {0}
         run: |
+          source $(conda info --base)/etc/profile.d/conda.sh
           conda activate test-env
           cd src
           python -X dev -u Spasso.py WMedSeaExample
@@ -87,25 +90,28 @@ jobs:
           channels: conda-forge
           activate-environment: test-env
 
-      - name: Remove existing Conda environment (if any)
+      - name: Fully Reset Conda Environment
         shell: bash -l {0}
         run: |
-          conda env remove --name test-env --yes || echo "No existing environment"
+          conda deactivate || echo "No active env"
+          conda remove --name test-env --all --yes || echo "Env does not exist"
 
-      - name: Create Conda environment
+      - name: Create or Update Conda Environment
         shell: bash -l {0}
         run: |
-          conda env create -f environment.yml
+          conda env create -f environment.yml || conda env update --file environment.yml --prune
 
       - name: Activate Conda environment
         shell: bash -l {0}
         run: |
+          eval "$(${CONDA}/condabin/conda.bat shell.bash hook)"
           conda activate test-env
           conda info --envs  # Debugging
 
       - name: Run script
         shell: bash -l {0}
         run: |
+          eval "$(${CONDA}/condabin/conda.bat shell.bash hook)"
           conda activate test-env
           cd src
           python -X dev -u Spasso.py WMedSeaExample
