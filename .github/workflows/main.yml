@@ -23,20 +23,16 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
-      # 🔍 Show directory structure
       - name: Show Directory Structure
         run: pwd && ls -R
 
-      # 🔍 Ensure script is executable
       - name: Ensure script is executable
         run: chmod +x ./src/Spasso.py
 
-      # 🔍 Show Python path
       - name: Debug PYTHONPATH
         run: echo $PYTHONPATH
 
-      # ✅ Run with verbose debugging
-      - name: Debug Execution
+      - name: Run with verbose debugging
         run: set -x && cd src && python -X dev -u Spasso.py WMedSeaExample
 
   Run-on-macOS:
@@ -45,45 +41,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # ✅ Install system dependencies using Homebrew
-      - name: Install system dependencies (HDF5 & NetCDF)
-        run: |
-          brew install hdf5 netcdf
-
-      # ✅ Set up Conda for package management
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
+          miniforge-version: "latest"  # Explicitly install Miniforge
           auto-update-conda: true
           python-version: "3.11"
           channels: conda-forge
           activate-environment: test-env
 
-      # ✅ Install necessary libraries with Conda
       - name: Install dependencies via Conda
         shell: bash -l {0}
         run: |
           conda install -y -c conda-forge hdf5 netcdf4 cython numpy
 
-      # ✅ Upgrade pip & setuptools
       - name: Upgrade Pip and Setuptools
         shell: bash -l {0}
         run: |
           python -m pip install --upgrade pip setuptools wheel
 
-      # ✅ Install Python dependencies
       - name: Install Python dependencies
         shell: bash -l {0}
         run: |
           pip install -r requirements.txt --no-cache-dir
 
-      # ✅ Verify Installed Libraries
       - name: Verify Installed Libraries
         shell: bash -l {0}
         run: |
           python -c "import netCDF4; print('netCDF4 installed successfully')"
 
-      # ✅ Run the code
       - name: Run script
         shell: bash -l {0}
         run: |
@@ -96,45 +82,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # ✅ Install Chocolatey packages for HDF5 & NetCDF
-      - name: Install Chocolatey Packages
-        run: |
-          choco install -y hdf5 netcdf
-
-      # ✅ Set up Miniconda for package management
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
+          miniforge-version: "latest"
           auto-update-conda: true
           python-version: "3.11"
           channels: conda-forge
           activate-environment: test-env
 
-      # ✅ Install dependencies using Conda
       - name: Install dependencies via Conda
         shell: cmd /C CALL
         run: |
           conda install -y -c conda-forge hdf5 netcdf4 cython numpy
 
-      # ✅ Upgrade Pip and Setuptools
       - name: Upgrade Pip and Setuptools
         shell: cmd /C CALL
         run: |
           python -m pip install --upgrade pip setuptools wheel
 
-      # ✅ Install Python dependencies
       - name: Install Python dependencies
         shell: cmd /C CALL
         run: |
           pip install -r requirements.txt --no-cache-dir
 
-      # ✅ Verify Installed Libraries
       - name: Verify Installed Libraries
         shell: cmd /C CALL
         run: |
           python -c "import netCDF4; print('netCDF4 installed successfully')"
 
-      # ✅ Run the code
       - name: Run script
         shell: cmd /C CALL
         run: |
