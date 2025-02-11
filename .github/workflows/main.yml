@@ -107,10 +107,20 @@ jobs:
         shell: bash -l {0}
         run: |
           eval "$(${CONDA}/condabin/conda.bat shell.bash hook)"
-          conda env create -f environment.yml || echo "Environment exists, updating..."
-          conda env update --name test-env --file environment.yml --prune
+          conda create --name test-env python=3.11 -y
+          conda activate test-env
+          conda install -y -c conda-forge numpy=1.26.4 scipy matplotlib cython hdf5 netcdf4
 
-      - name: Activate and Debug Environment
+      - name: **Force Reinstall Numpy and Dependencies**
+        shell: bash -l {0}
+        run: |
+          eval "$(${CONDA}/condabin/conda.bat shell.bash hook)"
+          conda activate test-env
+          conda remove --force numpy scipy --yes
+          conda clean --all --yes
+          conda install -y -c conda-forge numpy=1.26.4 scipy matplotlib
+
+      - name: Debug Conda and Python Environment
         shell: bash -l {0}
         run: |
           eval "$(${CONDA}/condabin/conda.bat shell.bash hook)"
@@ -119,12 +129,6 @@ jobs:
           python -m pip list
           python -c "import numpy; print('numpy version:', numpy.__version__)"
 
-      - name: Manually Clear Old Python Caches (Fixes 'Failed to remove contents' warning)
-        shell: bash -l {0}
-        run: |
-          rm -rf C:/Miniconda/envs/test-env/Lib/site-packages/~umpy
-          rm -rf C:/Miniconda/envs/test-env/Lib/site-packages/~atplotlib
-
       - name: Run script
         shell: bash -l {0}
         run: |
@@ -132,4 +136,3 @@ jobs:
           conda activate test-env
           cd src
           python -X dev -u Spasso.py WMedSeaExample
-
