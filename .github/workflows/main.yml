@@ -52,6 +52,8 @@ jobs:
       - name: Install system dependencies
         run: |
           brew install hdf5 netcdf
+          echo "HDF5_DIR=$(brew --prefix hdf5)" >> $GITHUB_ENV
+          echo "NETCDF4_DIR=$(brew --prefix netcdf)" >> $GITHUB_ENV
           export HDF5_DIR=$(brew --prefix hdf5)
           export NETCDF4_DIR=$(brew --prefix netcdf)
 
@@ -76,6 +78,7 @@ jobs:
         run: |
           cd src
           python -X dev -u Spasso.py WMedSeaExample
+          
   Run-on-Windows:
     name: Run code on Windows
     runs-on: windows-latest
