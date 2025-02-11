@@ -44,32 +44,48 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
 
-      # ✅ Install system dependencies required for netCDF4
-      - name: Install system dependencies
+      # ✅ Install system dependencies using Homebrew
+      - name: Install system dependencies (HDF5 & NetCDF)
         run: |
           brew install hdf5 netcdf
-          echo "HDF5_DIR=$(brew --prefix hdf5)" >> $GITHUB_ENV
-          echo "NETCDF4_DIR=$(brew --prefix netcdf)" >> $GITHUB_ENV
-          export HDF5_DIR=$(brew --prefix hdf5)
-          export NETCDF4_DIR=$(brew --prefix netcdf)
-          export CPATH=$(brew --prefix hdf5)/include:$CPATH
-          export LIBRARY_PATH=$(brew --prefix hdf5)/lib:$LIBRARY_PATH
-          export LD_LIBRARY_PATH=$(brew --prefix hdf5)/lib:$LD_LIBRARY_PATH
 
-      # ✅ Upgrade pip and install build tools
-      - name: Upgrade pip and install build tools
-        run: pip install --upgrade pip setuptools wheel Cython numpy
+      # ✅ Set up Conda for package management
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: "3.11"
+          channels: conda-forge
+          activate-environment: test-env
 
-      # ✅ Install all Python dependencies, including netCDF4
+      # ✅ Install necessary libraries with Conda
+      - name: Install dependencies via Conda
+        shell: bash -l {0}
+        run: |
+          conda install -y -c conda-forge hdf5 netcdf4 cython numpy
+
+      # ✅ Upgrade pip & setuptools
+      - name: Upgrade Pip and Setuptools
+        shell: bash -l {0}
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+
+      # ✅ Install Python dependencies
       - name: Install Python dependencies
-        run: pip install -r requirements.txt
+        shell: bash -l {0}
+        run: |
+          pip install -r requirements.txt --no-cache-dir
 
-      # ✅ Run the script
-      - name: Debug Execution
+      # ✅ Verify Installed Libraries
+      - name: Verify Installed Libraries
+        shell: bash -l {0}
+        run: |
+          python -c "import netCDF4; print('netCDF4 installed successfully')"
+
+      # ✅ Run the code
+      - name: Run script
+        shell: bash -l {0}
         run: |
           cd src
           python -X dev -u Spasso.py WMedSeaExample
@@ -79,29 +95,48 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+
+      # ✅ Install Chocolatey packages for HDF5 & NetCDF
+      - name: Install Chocolatey Packages
+        run: |
+          choco install -y hdf5 netcdf
+
+      # ✅ Set up Miniconda for package management
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: '3.11'
+          auto-update-conda: true
+          python-version: "3.11"
+          channels: conda-forge
+          activate-environment: test-env
 
-      # ✅ Upgrade pip separately first
-      - name: Upgrade pip separately
-        run: python -m pip install --upgrade pip
+      # ✅ Install dependencies using Conda
+      - name: Install dependencies via Conda
+        shell: cmd /C CALL
+        run: |
+          conda install -y -c conda-forge hdf5 netcdf4 cython numpy
 
-      # ✅ Install numpy first
-      - name: Install numpy first
-        run: pip install --upgrade setuptools wheel numpy
+      # ✅ Upgrade Pip and Setuptools
+      - name: Upgrade Pip and Setuptools
+        shell: cmd /C CALL
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
 
-      # ✅ Install Windows dependencies for netCDF4 (if needed)
-      - name: Install Windows dependencies
-        run: choco install netcdf hdf5
-
-      # ✅ Install all other dependencies
+      # ✅ Install Python dependencies
       - name: Install Python dependencies
-        run: pip install -r requirements.txt
+        shell: cmd /C CALL
+        run: |
+          pip install -r requirements.txt --no-cache-dir
 
-      # ✅ Run the script
-      - name: Debug Execution
-        shell: bash
+      # ✅ Verify Installed Libraries
+      - name: Verify Installed Libraries
+        shell: cmd /C CALL
+        run: |
+          python -c "import netCDF4; print('netCDF4 installed successfully')"
+
+      # ✅ Run the code
+      - name: Run script
+        shell: cmd /C CALL
         run: |
           cd src
           python -X dev -u Spasso.py WMedSeaExample
