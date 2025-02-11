@@ -50,23 +50,24 @@ jobs:
           channels: conda-forge
           activate-environment: test-env
 
-      - name: Fully Reset Conda Environment
+      - name: Check existing Conda environments
         shell: bash -l {0}
-        run: |
-          conda deactivate || echo "No active env"
-          conda remove --name test-env --all --yes || echo "Env does not exist"
+        run: conda env list
 
-      - name: Create or Update Conda Environment
+      - name: Remove conflicting Conda environment if exists
         shell: bash -l {0}
-        run: |
-          conda env create -f environment.yml || conda env update --file environment.yml --prune
+        run: conda remove --name test-env --all -y || echo "No existing test-env"
 
-      - name: Activate Conda environment
+      - name: Create or Update Conda environment
+        shell: bash -l {0}
+        run: conda env create -f environment.yml || conda env update --file environment.yml --prune
+
+      - name: Activate Conda environment and Verify
         shell: bash -l {0}
         run: |
           source $(conda info --base)/etc/profile.d/conda.sh
           conda activate test-env
-          conda info --envs  # Debugging
+          python -c "import netCDF4; print('netCDF4 installed successfully')"
 
       - name: Run script
         shell: bash -l {0}
