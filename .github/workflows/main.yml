@@ -50,24 +50,30 @@ jobs:
           channels: conda-forge
           activate-environment: test-env
 
-      - name: Check existing Conda environments
+      - name: Initialize Conda
         shell: bash -l {0}
-        run: conda env list
+        run: source $(conda info --base)/etc/profile.d/conda.sh
 
-      - name: Remove conflicting Conda environment if exists
-        shell: bash -l {0}
-        run: conda remove --name test-env --all -y || echo "No existing test-env"
-
-      - name: Create or Update Conda environment
+      - name: Install dependencies via Conda
         shell: bash -l {0}
         run: conda env create -f environment.yml || conda env update --file environment.yml --prune
 
-      - name: Activate Conda environment and Verify
+      - name: Fix NumPy & SciPy Issues
         shell: bash -l {0}
         run: |
-          source $(conda info --base)/etc/profile.d/conda.sh
           conda activate test-env
-          python -c "import netCDF4; print('netCDF4 installed successfully')"
+          conda remove --force numpy scipy matplotlib
+          conda clean --all --yes
+          conda install -y -c conda-forge numpy scipy matplotlib
+          python -c "import numpy; print('NumPy installed:', numpy.__version__)"
+          python -c "import scipy; print('SciPy installed:', scipy.__version__)"
+
+      - name: Run script
+        shell: bash -l {0}
+        run: |
+          conda activate test-env
+          cd src
+          python -X dev -u Spasso.py WMedSeaExample
 
       - name: Run script
         shell: bash -l {0}
