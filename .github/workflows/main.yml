@@ -77,7 +77,7 @@ jobs:
           python -X dev -u Spasso.py WMedSeaExample
 
   Run-on-Windows:
-    name: Run code on Windows
+    name: Run code on Window
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
