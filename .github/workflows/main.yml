@@ -34,7 +34,6 @@ jobs:
 
       - name: Run with verbose debugging
         run: set -x && cd src && python -X dev -u Spasso.py WMedSeaExample
-
   Run-on-macOS:
     name: Run code on macOS
     runs-on: macos-latest
@@ -53,22 +52,25 @@ jobs:
       - name: Initialize Conda
         shell: bash -l {0}
         run: |
+          echo "🔧 Initializing Conda..."
           source $(conda info --base)/etc/profile.d/conda.sh
           conda activate test-env
 
       - name: Install dependencies via Conda
         shell: bash -l {0}
         run: |
+          echo "📦 Installing dependencies..."
           conda env create -f environment.yml || conda env update --file environment.yml --prune
 
-      - name: Fix NumPy & SciPy (The Key Fix)
+      - name: **Fix Broken NumPy & SciPy**
         shell: bash -l {0}
         run: |
           conda activate test-env
-          echo "🔍 Checking broken NumPy & SciPy..."
+          echo "🚨 Fixing NumPy & SciPy..."
           conda remove --force numpy scipy matplotlib
           conda clean --all --yes
           conda install -y -c conda-forge numpy scipy matplotlib
+          echo "✅ NumPy & SciPy Fixed!"
           python -c "import numpy; print('✅ NumPy version:', numpy.__version__)"
           python -c "import scipy; print('✅ SciPy version:', scipy.__version__)"
 
