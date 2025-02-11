@@ -90,12 +90,6 @@ jobs:
           channels: conda-forge
           activate-environment: test-env
 
-      - name: Ensure Conda is initialized
-        shell: bash -l {0}
-        run: |
-          eval "$(${CONDA}/condabin/conda.bat shell.bash hook)"
-          conda init bash
-
       - name: Fully Reset Conda Environment (Fix 'prefix already exists' issue)
         shell: bash -l {0}
         run: |
@@ -109,25 +103,15 @@ jobs:
           eval "$(${CONDA}/condabin/conda.bat shell.bash hook)"
           conda create --name test-env python=3.11 -y
           conda activate test-env
-          conda install -y -c conda-forge numpy=1.26.4 scipy matplotlib=3.8.4 cython hdf5 netcdf4
-
-      - name: Force Reinstall Matplotlib & Dependencies
-        shell: bash -l {0}
-        run: |
-          eval "$(${CONDA}/condabin/conda.bat shell.bash hook)"
-          conda activate test-env
-          conda remove --force matplotlib --yes
-          conda clean --all --yes
-          conda install -y -c conda-forge matplotlib=3.8.4
+          conda install -y -c conda-forge numpy=1.26.4 scipy=1.13.0 matplotlib=3.8.4 cython hdf5 netcdf4
 
       - name: Debug Conda and Python Environment
         shell: bash -l {0}
         run: |
           eval "$(${CONDA}/condabin/conda.bat shell.bash hook)"
           conda activate test-env
-          conda list
           python -m pip list
-          python -c "import matplotlib; print('matplotlib version:', matplotlib.__version__)"
+          python -c "import scipy; print('scipy version:', scipy.__version__)"
 
       - name: Run script
         shell: bash -l {0}
@@ -136,3 +120,4 @@ jobs:
           conda activate test-env
           cd src
           python -X dev -u Spasso.py WMedSeaExample
+
