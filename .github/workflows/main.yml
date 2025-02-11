@@ -90,23 +90,40 @@ jobs:
           channels: conda-forge
           activate-environment: test-env
 
-      - name: Fully Reset Conda Environment
+      - name: Ensure Conda is initialized
         shell: bash -l {0}
         run: |
+          eval "$(${CONDA}/condabin/conda.bat shell.bash hook)"
+          conda init bash
+
+      - name: Fully Reset Conda Environment (Fixes 'prefix already exists' issue)
+        shell: bash -l {0}
+        run: |
+          eval "$(${CONDA}/condabin/conda.bat shell.bash hook)"
           conda deactivate || echo "No active env"
-          conda remove --name test-env --all --yes || echo "Env does not exist"
+          conda env remove --name test-env --yes || echo "No existing environment"
 
       - name: Create or Update Conda Environment
         shell: bash -l {0}
         run: |
-          conda env create -f environment.yml || conda env update --file environment.yml --prune
+          eval "$(${CONDA}/condabin/conda.bat shell.bash hook)"
+          conda env create -f environment.yml || echo "Environment exists, updating..."
+          conda env update --name test-env --file environment.yml --prune
 
-      - name: Activate Conda environment
+      - name: Activate and Debug Environment
         shell: bash -l {0}
         run: |
           eval "$(${CONDA}/condabin/conda.bat shell.bash hook)"
           conda activate test-env
-          conda info --envs  # Debugging
+          conda list
+          python -m pip list
+          python -c "import numpy; print('numpy version:', numpy.__version__)"
+
+      - name: Manually Clear Old Python Caches (Fixes 'Failed to remove contents' warning)
+        shell: bash -l {0}
+        run: |
+          rm -rf C:/Miniconda/envs/test-env/Lib/site-packages/~umpy
+          rm -rf C:/Miniconda/envs/test-env/Lib/site-packages/~atplotlib
 
       - name: Run script
         shell: bash -l {0}
@@ -115,3 +132,4 @@ jobs:
           conda activate test-env
           cd src
           python -X dev -u Spasso.py WMedSeaExample
+
