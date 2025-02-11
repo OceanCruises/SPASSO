@@ -48,12 +48,18 @@ jobs:
         with:
           python-version: '3.11'
 
+      # ✅ Install system dependencies required for netCDF4
       - name: Install system dependencies
-        run: brew install hdf5 netcdf
+        run: |
+          brew install hdf5 netcdf
+          export HDF5_DIR=$(brew --prefix hdf5)
+          export NETCDF4_DIR=$(brew --prefix netcdf)
 
-      - name: Install numpy first
-        run: pip install --upgrade pip setuptools wheel numpy
+      # ✅ Upgrade pip and install build tools
+      - name: Upgrade pip and install build tools
+        run: pip install --upgrade pip setuptools wheel Cython numpy
 
+      # ✅ Install all Python dependencies, including netCDF4
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
@@ -65,10 +71,11 @@ jobs:
       - name: Debug PYTHONPATH
         run: echo $PYTHONPATH
 
-      # ✅ Run with verbose debugging
+      # ✅ Run the script
       - name: Debug Execution
-        run: set -x && cd src && python -X dev -u Spasso.py WMedSeaExample
-
+        run: |
+          cd src
+          python -X dev -u Spasso.py WMedSeaExample
   Run-on-Windows:
     name: Run code on Windows
     runs-on: windows-latest
