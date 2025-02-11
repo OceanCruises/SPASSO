@@ -34,15 +34,17 @@ jobs:
 
       - name: Run with verbose debugging
         run: set -x && cd src && python -X dev -u Spasso.py WMedSeaExample
+
   Run-on-macOS:
     name: Run code on macOS
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Miniconda
+      - name: Set up Miniforge (Conda)
         uses: conda-incubator/setup-miniconda@v2
         with:
+          miniforge-version: "latest"  # Ensures Miniforge is installed
           auto-update-conda: true
           python-version: "3.11"
           channels: conda-forge
