@@ -75,9 +75,8 @@ jobs:
           conda activate test-env
           cd src
           python -X dev -u Spasso.py WMedSeaExample
-
   Run-on-Windows:
-    name: Run code on Window
+    name: Run code on Windows
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -111,7 +110,7 @@ jobs:
           conda activate test-env
           conda install -y -c conda-forge numpy=1.26.4 scipy matplotlib cython hdf5 netcdf4
 
-      - name: **Force Reinstall Numpy and Dependencies**
+      - name: Force Reinstall Numpy and Dependencies
         shell: bash -l {0}
         run: |
           eval "$(${CONDA}/condabin/conda.bat shell.bash hook)"
@@ -136,3 +135,4 @@ jobs:
           conda activate test-env
           cd src
           python -X dev -u Spasso.py WMedSeaExample
+
