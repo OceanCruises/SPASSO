@@ -56,6 +56,9 @@ jobs:
           echo "NETCDF4_DIR=$(brew --prefix netcdf)" >> $GITHUB_ENV
           export HDF5_DIR=$(brew --prefix hdf5)
           export NETCDF4_DIR=$(brew --prefix netcdf)
+          export CPATH=$(brew --prefix hdf5)/include:$CPATH
+          export LIBRARY_PATH=$(brew --prefix hdf5)/lib:$LIBRARY_PATH
+          export LD_LIBRARY_PATH=$(brew --prefix hdf5)/lib:$LD_LIBRARY_PATH
 
       # ✅ Upgrade pip and install build tools
       - name: Upgrade pip and install build tools
@@ -65,20 +68,12 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
-      # 🔍 Show directory structure
-      - name: Show Directory Structure
-        run: pwd && ls -R
-
-      # 🔍 Show Python path
-      - name: Debug PYTHONPATH
-        run: echo $PYTHONPATH
-
       # ✅ Run the script
       - name: Debug Execution
         run: |
           cd src
           python -X dev -u Spasso.py WMedSeaExample
-          
+
   Run-on-Windows:
     name: Run code on Windows
     runs-on: windows-latest
@@ -88,21 +83,23 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install numpy first
-        run: pip install --upgrade pip setuptools wheel numpy
+      # ✅ Upgrade pip separately first
+      - name: Upgrade pip separately
+        run: python -m pip install --upgrade pip
 
+      # ✅ Install numpy first
+      - name: Install numpy first
+        run: pip install --upgrade setuptools wheel numpy
+
+      # ✅ Install Windows dependencies for netCDF4 (if needed)
+      - name: Install Windows dependencies
+        run: choco install netcdf hdf5
+
+      # ✅ Install all other dependencies
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
-      # 🔍 Show directory structure
-      - name: Show Directory Structure
-        run: pwd && ls -R
-
-      # 🔍 Show Python path
-      - name: Debug PYTHONPATH
-        run: echo $PYTHONPATH
-
-      # ✅ Run with verbose debugging
+      # ✅ Run the script
       - name: Debug Execution
         shell: bash
         run: |
