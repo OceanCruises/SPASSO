@@ -52,13 +52,16 @@ jobs:
 
       - name: Initialize Conda
         shell: bash -l {0}
-        run: source $(conda info --base)/etc/profile.d/conda.sh
+        run: |
+          source $(conda info --base)/etc/profile.d/conda.sh
+          conda activate test-env
 
       - name: Install dependencies via Conda
         shell: bash -l {0}
-        run: conda env create -f environment.yml || conda env update --file environment.yml --prune
+        run: |
+          conda env create -f environment.yml || conda env update --file environment.yml --prune
 
-      - name: **Fix NumPy & SciPy (The Key Fix)**
+      - name: Fix NumPy & SciPy (The Key Fix)
         shell: bash -l {0}
         run: |
           conda activate test-env
@@ -66,8 +69,8 @@ jobs:
           conda remove --force numpy scipy matplotlib
           conda clean --all --yes
           conda install -y -c conda-forge numpy scipy matplotlib
-          python -c "import numpy; print('NumPy version:', numpy.__version__)"
-          python -c "import scipy; print('SciPy version:', scipy.__version__)"
+          python -c "import numpy; print('✅ NumPy version:', numpy.__version__)"
+          python -c "import scipy; print('✅ SciPy version:', scipy.__version__)"
 
       - name: Run script
         shell: bash -l {0}
