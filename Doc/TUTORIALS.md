@@ -14,9 +14,9 @@ below starts from the most simple and standard configuration example WMedSeaExam
 
 [Other Lagrangian diagnostics](#other-lagrangian-diagnostics)
 
-[How to set some plot options ?](#how-to-set-some-plot-options?)
+[How to set some plot options ?](#how-to-set-some-plot-options-?)
 
-[How to download data on a restricted area ?](#how-to-download-data-on-a-restricted-area?)
+[How to download data on a restricted area ?](#how-to-download-data-on-a-restricted-area-?)
 
 
 ## Standard SPASSO run
