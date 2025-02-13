@@ -14,7 +14,10 @@ below starts from the most simple and standard configuration example WMedSeaExam
 
 [Other Lagrangian diagnostics](#other-lagrangian-diagnostics)
 
-[Plot options](#plot-options)
+[How to set some plot options ?](#how-to-set-some-plot-options?)
+
+[How to download data on a restricted area ?](#how-to-download-data-on-a-restricted-area?)
+
 
 ## Standard SPASSO run
 - Run standard SPASSO config (in a terminal window):
@@ -102,7 +105,7 @@ local@ubuntu: clear; python3 Spasso.py WMedSeaExample
 
 > The satellite product used to compute the Lagrangian (and Eulerian) diagnostics <ins>MUST</ins> be defined in `products =` both in the `[products]` and `[Lagrangian]` sections. 
 
-## Plot options
+## How to set some plot options ?
 Several basic options, defined in the `config_WMedSeaExample.ini`, can be ploted on each SPASSO figures (L 273).
 - Station, waypoint positions:
   ```
@@ -129,3 +132,15 @@ Several basic options, defined in the `config_WMedSeaExample.ini`, can be ploted
   outopt              = kml
   ```
 > When kml option is set, figures are still saved in png.
+
+## How to download data on a restricted area ?
+- Open `Fields.py`
+- Look for the `copernicus.get()` command in the data class (ex: `class Copernicus_PHY():`)
+- Change the `copernicus.get()` command for `copernicus.subset()`:
+  ```
+  copernicusmarine.subset( 
+    dataset_id = <dataset_id>,
+    [OPTION] = <value>,
+      )
+  ```
+> More detailed information and examples on the `subset` command can be found in the [Copernicus Marine toolbox](https://help.marine.copernicus.eu/en/articles/7949409-copernicus-marine-toolbox-introduction#h_ef46a02a48) website.
