@@ -93,7 +93,7 @@ The manuscript detailing the first release of SPASSO, version 2.0, is currently 
 
 *Louise Rousselet, Francesco d’Ovidio, Lloyd Izard, Alice Della Penna, Anne Petrenko, et al.. A
 Software Package for an Adaptive Satellite-based Sampling for Oceanographic cruises (SPASSOv2.0):
-tracking fine scale features for physical and biogeochemical studies. 2024. hal-04705438* [link](https://journals.ametsoc.org/view/journals/atot/42/8/JTECH-D-24-0071.1.xml)
+tracking fine scale features for physical and biogeochemical studies. 2025. JAOT* [link](https://journals.ametsoc.org/view/journals/atot/42/8/JTECH-D-24-0071.1.xml)
 
 # SPASSO fundings and supports
 SPASSO development has been supported by the following organisations:
